@@ -12,6 +12,7 @@ YourDatasetName
 --Label 2
 ----...
 ```
+You can find pretrained model at [link](https://drive.google.com/drive/folders/1FMXmo0I9Mhqgjn2cwyD9WcoaV0Ey65dU?usp=sharing) 
 
 ## Training
 run file ```main.py```
