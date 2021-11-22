@@ -10,24 +10,24 @@ from torchvision import transforms
 import matplotlib.pyplot as plt
 from PIL import Image
 
-class CelebA(Dataset):
-    def __init__(self, device: int = 0, root_dir: str = "/path/to/your/dataset/folder"):
-        super(CelebA, self).__init__()
-        self.transform = transforms.Compose(
-            [
-             transforms.RandomHorizontalFlip(),
-             transforms.ToTensor(),
-             # transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-             transforms.Normalize(mean = [0.485, 0.456, 0.406],
-                                  std = [0.229, 0.224, 0.225]),
-             ])
-        self.root_dir = root_dir
+# class CelebA(Dataset):
+#     def __init__(self, device: int = 0, root_dir: str = "/path/to/your/dataset/folder"):
+#         super(CelebA, self).__init__()
+#         self.transform = transforms.Compose(
+#             [
+#              transforms.RandomHorizontalFlip(),
+#              transforms.ToTensor(),
+#              # transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+#              transforms.Normalize(mean = [0.485, 0.456, 0.406],
+#                                   std = [0.229, 0.224, 0.225]),
+#              ])
+#         self.root_dir = root_dir
         
-    def __getitem__(self, index):
-        pass
+#     def __getitem__(self, index):
+#         pass
 
-    def __len__(self):
-        pass
+#     def __len__(self):
+#         pass
 
 class FaceDataset(Dataset):
     def __init__(self, device: int = 0, root_dir: str = "/path/to/your/dataset/folder"):
@@ -42,10 +42,14 @@ class FaceDataset(Dataset):
              ])
         self.root_dir = root_dir
         self.device = device
-        self.list_data = self.preload()
+        self.list_data, self.id2name = self.preload()
     
+    def convert_id2name(self, id):
+        return self.id2name[str(id)]
+
     def preload(self):
         list_data = []
+        id2name = {}
         label_index = 0 #convert string label name to int index
         for folder_name in os.listdir(self.root_dir):
             for image_name in os.listdir(self.root_dir+"/"+folder_name):
@@ -53,11 +57,12 @@ class FaceDataset(Dataset):
                 sample = {
                     "image": image,
                     "label": label_index,
-                    "label_name": folder_name
                 }
                 list_data.append(sample)
+            
+            id2name[str(label_index)]=folder_name
             label_index+=1 
-        return list_data
+        return list_data, id2name
 
     def __getitem__(self, index):
         if index >= self.__len__():
@@ -75,6 +80,7 @@ class FaceDataset(Dataset):
 
 if __name__ == '__main__':
     grooo_dataset=FaceDataset(root_dir="data/Grooo")
+    print(grooo_dataset.name2id)
     # sample = grooo_dataset.__getitem__(0)
     # train_size = int(0.8 * len(grooo_dataset))
     # test_size = len(grooo_dataset) - train_size
