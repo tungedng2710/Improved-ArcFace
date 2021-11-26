@@ -8,7 +8,9 @@ import torch
 from PIL import ImageFile
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-PRETRAINED_PATH="irse50.pth"
+
+BACKBONE = 'mobilenet'
+PRETRAINED_PATH="weights/model_mobilefacenet.pth"
 ROOT_DIR = "/home/tungedng2710/python/Project/data/Face112_masked_aligned"
 N_EPOCHS = 10
 
@@ -30,7 +32,7 @@ if __name__ == '__main__':
                                             shuffle = False,
                                             num_workers = 8)
 
-    model = ArcFaceModel(backbone='irse50', 
+    model = ArcFaceModel(backbone_name=BACKBONE, 
                         input_size=[112,112],
                         num_classes=num_classes,
                         use_pretrained=True,
@@ -45,9 +47,10 @@ if __name__ == '__main__':
     trainer = Trainer(model=model,
                       n_epochs=N_EPOCHS,
                       optimizer=optimizer,
-                      loss_function=ElasticArcFaceLoss(), # ArcFaceLoss()
+                      # loss_function=ElasticArcFaceLoss(), 
+                      loss_function = ArcFaceLoss(),
                       train_loader=train_loader,
                       val_loader=val_loader)
 
     trained_model = trainer.train()
-    torch.save(trained_model.state_dict(), 'arcface.pth')
+    torch.save(trained_model.state_dict(), 'logs/arcface_'+BACKBONE+'.pth')

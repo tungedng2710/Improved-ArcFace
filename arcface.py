@@ -1,5 +1,5 @@
-from backbone.model_irse import IR_50, IR_SE_50, IR_SE_101, IR_SE_152
-# from backbone.MobileFaceNets import MobileFaceNet
+from backbone.model_irse import IR_50, IR_SE_50, IR_101, IR_SE_101, IR_152, IR_SE_152
+from backbone.MobileFaceNets import MobileFaceNet
 
 import torch
 import torch.nn as nn
@@ -35,7 +35,7 @@ class NormalizedLinear(nn.Module):
 
 class ArcFaceModel(nn.Module):
     def __init__(self, 
-                backbone: str = 'ir50', 
+                backbone_name: str = 'ir50', 
                 num_classes: int = 1000, 
                 input_size: list = [112, 112],
                 use_pretrained: bool = True,
@@ -44,7 +44,7 @@ class ArcFaceModel(nn.Module):
                 freeze: bool = True,
                 type_of_freeze: str= "all"):
         """
-        backbone (str): ir50, irse50, irse101, irse152
+        backbone (str): ir50, irse50, irse101, irse152, mobilenet
         input_size (list): input image size; example: [112, 112]  
         num_classes (int): number of face id
         use_pretrained (bool): use pretrained model
@@ -53,33 +53,66 @@ class ArcFaceModel(nn.Module):
         type_of_freeze (str): all (embedding + backbone), emb_only, body_only
         """
         super(ArcFaceModel, self).__init__()
-        if backbone == 'ir50': 
+        print(backbone_name)
+        if backbone_name == 'ir50': 
             self.backbone = IR_50(input_size)
-        elif backbone == 'irse50':
+        elif backbone_name == 'irse50':
             self.backbone = IR_SE_50(input_size)
-        elif backbone == 'irse101': 
+        elif backbone_name == 'irse101': 
             self.backbone = IR_SE_101(input_size)
-        elif backbone == 'irse152':
+        elif backbone_name == 'irse152':
             self.backbone = IR_SE_152(input_size)
-
+        elif backbone_name == 'mobilenet':
+            self.backbone = MobileFaceNet(embedding_size=512,
+                                          out_h=7,
+                                          out_w=7)
         if use_pretrained:
+            print("Freezing your model...")
             self.backbone.load_state_dict(torch.load(pretrained_path))
             if freeze:
-                if type_of_freeze == 'all':
-                    freeze_module(self.backbone)
-                elif type_of_freeze == 'body_only':
-                    freeze_module(self.backbone.input_layer) 
-                    freeze_module(self.backbone.body)
-                elif type_of_freeze == 'emb_only':
-                    freeze_module(self.backbone.input_layer) 
-                    freeze_module(self.backbone.output_layer)
-
+                if 'irse' in backbone_name:
+                    self.backbone = self.freeze_irse_backbone(self.backbone,
+                                                              type_of_freeze)
+                elif 'mobile' in backbone_name:
+                    self.backbone = self.freeze_mobilenet_backbone(self.backbone,
+                                                                   type_of_freeze)
+    
         self.use_elasticloss = use_elasticloss
         if self.use_elasticloss:
             self.kernel = nn.Parameter(torch.FloatTensor(512, num_classes))
             nn.init.normal_(self.kernel, std=0.01)
         else:
             self.linear = NormalizedLinear(in_features=512, out_features=num_classes)
+
+    def freeze_irse_backbone(self,
+                             irse_backbone = None, 
+                             type_of_freeze = "all"):
+        if type_of_freeze == 'all':
+            freeze_module(irse_backbone)
+        elif type_of_freeze == 'body_only':
+            freeze_module(irse_backbone.input_layer) 
+            freeze_module(irse_backbone.body)
+        elif type_of_freeze == 'emb_only':
+            freeze_module(irse_backbone.input_layer) 
+            freeze_module(irse_backbone.output_layer)
+        else:
+            pass
+        return irse_backbone
+
+    def freeze_mobilenet_backbone(self, 
+                                  mobile_backbone = None,
+                                  type_of_freeze = 'all'):
+        if type_of_freeze == 'all':
+            freeze_module(mobile_backbone)
+        elif type_of_freeze == 'body_only':
+            i = 0
+            for child in mobile_backbone.children():
+                if i < 11:
+                    freeze_module(child)
+                i=i+1
+        else:
+            freeze_module(mobile_backbone)
+        return mobile_backbone
 
     def forward(self, x):
         if self.use_elasticloss:

@@ -29,13 +29,13 @@ class Trainer:
         self.val_loader = val_loader
         
         
-    def train(self):
+    def train(self, loss_verbose = False):
         train_loss_list = []
         val_accuracy_list = [-1]
 
         best_model = self.model
-        for epoch in tqdm(range(self.n_epochs)):
-            for idx, (image, y_train) in enumerate(self.train_loader):
+        for epoch in range(self.n_epochs):
+            for idx, (image, y_train) in tqdm(enumerate(self.train_loader)):
                 image = image.to(self.device)
                 y_train=y_train.to(self.device)
                 y_pred = self.model(image)
@@ -44,7 +44,8 @@ class Trainer:
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
-                print("iter ", idx, "Train loss: ", loss.item())
+                if loss_verbose:
+                    print("iter ", idx, "Train loss: ", loss.item())
 
             acc = []
             for idx, (image, y_val) in enumerate(self.val_loader):
