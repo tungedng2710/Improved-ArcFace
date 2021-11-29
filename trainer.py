@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 
-
 class Trainer:
     def __init__(self,
                  model = None,
@@ -29,7 +28,7 @@ class Trainer:
         self.val_loader = val_loader
         
         
-    def train(self, loss_verbose = False):
+    def train(self, loss_verbose = False, use_sam = False):
         train_loss_list = []
         val_accuracy_list = [-1]
 
@@ -39,11 +38,18 @@ class Trainer:
                 image = image.to(self.device)
                 y_train=y_train.to(self.device)
                 y_pred = self.model(image)
-                loss = self.loss_function(y_pred, y_train)
 
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
+                if use_sam:
+                    loss = self.loss_function(y_pred, y_train)
+                    loss.backward()
+                    self.optimizer.first_step(zero_grad=True)
+                    self.loss_function(self.model(image), y_train).backward()  # make sure to do a full forward pass
+                    self.optimizer.second_step(zero_grad=True)                    
+                else:
+                    loss = self.loss_function(y_pred, y_train)
+                    self.optimizer.zero_grad()
+                    loss.backward()
+                    self.optimizer.step()
                 if loss_verbose:
                     print("iter ", idx, "Train loss: ", loss.item())
 
@@ -57,7 +63,6 @@ class Trainer:
                 best_model = self.model
                 
         return best_model
-        
 
     def val(self, X_val, y_val):
         X_val = X_val.to(self.device)

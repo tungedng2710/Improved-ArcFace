@@ -36,9 +36,9 @@ class FaceDataset(Dataset):
             [
              transforms.RandomHorizontalFlip(),
              transforms.ToTensor(),
-             # transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-             transforms.Normalize(mean = [0.485, 0.456, 0.406],
-                                  std = [0.229, 0.224, 0.225]),
+             transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+            #  transforms.Normalize(mean = [0.485, 0.456, 0.406],
+            #                       std = [0.229, 0.224, 0.225]),
              ])
         self.root_dir = root_dir
         self.device = device
@@ -77,6 +77,36 @@ class FaceDataset(Dataset):
 
     def __len__(self):
         return len(self.list_data)
+
+class Grooo_type_Dataloader:
+    def __init__(self, 
+                 root_dir = None, 
+                 val_size = 0.2, 
+                 random_seed = 0,
+                 batch_size_train = 64,
+                 batch_size_val = 32):
+        self.dataset = FaceDataset(root_dir=root_dir)
+        self.num_classes = len(os.listdir(root_dir))
+        self.val_size = int(val_size * self.dataset.__len__())
+        self.train_size = self.dataset.__len__() - self.val_size
+        torch.manual_seed(random_seed)
+        self.train_set, self.val_set = torch.utils.data.random_split(self.dataset, 
+                                                                     [self.train_size, self.val_size])
+        self.batch_size_train = batch_size_train
+        self.batch_size_val = batch_size_val
+
+    def get_dataloaders(self, num_worker = 8):
+        train_loader = torch.utils.data.DataLoader(self.train_set,
+                                                    batch_size = self.batch_size_train,
+                                                    shuffle = True,
+                                                    num_workers = num_worker,
+                                                    drop_last=True)
+        val_loader = torch.utils.data.DataLoader(self.val_set,
+                                                    batch_size = self.batch_size_val,
+                                                    shuffle = False,
+                                                    num_workers = num_worker)
+        return train_loader, val_loader
+
 
 if __name__ == '__main__':
     grooo_dataset=FaceDataset(root_dir="data/Grooo")
