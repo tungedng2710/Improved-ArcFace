@@ -43,6 +43,7 @@ class FaceDataset(Dataset):
         self.root_dir = root_dir
         self.device = device
         self.list_data, self.id2name = self.preload()
+        self.num_classes = len(os.listdir(root_dir))
     
     def convert_id2name(self, id):
         return self.id2name[str(id)]
@@ -86,7 +87,7 @@ class Grooo_type_Dataloader:
                  batch_size_train = 64,
                  batch_size_val = 32):
         self.dataset = FaceDataset(root_dir=root_dir)
-        self.num_classes = len(os.listdir(root_dir))
+        self.num_classes = self.dataset.num_classes
         self.val_size = int(val_size * self.dataset.__len__())
         self.train_size = self.dataset.__len__() - self.val_size
         torch.manual_seed(random_seed)

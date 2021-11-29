@@ -130,7 +130,7 @@ dmypy.json
 
 # Weights, logs and test file
 data/*
-logs/*
-weights/*
+logs/*.pt*
+weights/*.pt*
 *ipynb*
 verification.py

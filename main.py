@@ -1,3 +1,4 @@
+from genericpath import exists
 from re import L
 from trainer import Trainer
 from dataset import FaceDataset, Grooo_type_Dataloader
@@ -50,12 +51,12 @@ if __name__ == '__main__':
                         pretrained_path=pretrained_path,
                         freeze=config['freeze_model'],
                         use_elasticloss=True,
-                        type_of_freeze='body_only')
+                        type_of_freeze='all')
 
     n_epochs = config['n_epochs']
 
     if config['use_improved_optim']:
-        optimizer = SAM(model.parameters(), lr=config['learning_rate'], momentum=0.9)
+        optimizer = SAM(model.parameters(), lr=1e-3, momentum=0.9)
     else:
         optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
     
@@ -71,4 +72,6 @@ if __name__ == '__main__':
 
     # Save the best model
     if config['save_model']:
+        if os.path('./logs') is not exists:
+            os.mkdir('./logs')
         torch.save(trained_model.state_dict(), 'logs/arcface_'+config['backbone']+'.pth')
