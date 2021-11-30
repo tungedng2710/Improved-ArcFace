@@ -61,7 +61,7 @@ class ElasticArcFaceLoss(nn.Module):
         self.out_features = out_features
         self.s = s
         self.m = m
-        # self.kernel = nn.Parameter(torch.FloatTensor(in_features, 46))
+        # self.kernel = nn.Parameter(torch.FloatTensor(in_features, out_features))
         # nn.init.normal_(self.kernel, std=0.01)
         self.std=std
         self.criterion = FocalLoss()

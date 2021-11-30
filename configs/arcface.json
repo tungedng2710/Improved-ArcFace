@@ -1,0 +1,14 @@
+{
+    "train": {
+        "loss": "ArcFace", 
+        "backbone": "mobilenet",
+        "pretrained_model_path": "./weights/mobilenet.pth",
+        "root_dir": "./data/asian_masked",
+        "use_pretrained": true,
+        "freeze_model": true,
+        "n_epochs": 15,
+        "use_improved_optim": false,
+        "learning_rate": 5e-4,
+        "save_model": false
+    }
+}

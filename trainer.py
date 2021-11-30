@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch.optim.lr_scheduler import LambdaLR, StepLR
 from tqdm import tqdm
 
 class Trainer:
@@ -23,16 +24,18 @@ class Trainer:
         self.n_epochs = n_epochs
         self.optimizer = optimizer
         self.loss_function = loss_function
-        self.callback = callbacks
+        # self.callback = callbacks
         self.train_loader = train_loader
         self.val_loader = val_loader
         
-        
-    def train(self, loss_verbose = False, use_sam = False):
-        train_loss_list = []
-        val_accuracy_list = [-1]
+    def schedule_lr(self, optimizer):
+        scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
+        return scheduler        
 
+    def train(self, loss_verbose = False, use_sam = False):
         best_model = self.model
+        best_acc = -1
+        # scheduler = self.schedule_lr(self.optimizer)
         for epoch in range(self.n_epochs):
             for idx, (image, y_train) in tqdm(enumerate(self.train_loader)):
                 image = image.to(self.device)
@@ -50,6 +53,7 @@ class Trainer:
                     self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()
+                    # scheduler.step()
                 if loss_verbose:
                     print("iter ", idx, "Train loss: ", loss.item())
 
@@ -57,10 +61,13 @@ class Trainer:
             for idx, (image, y_val) in enumerate(self.val_loader):
                 acc.append(self.val(image, y_val))
             val_accuracy = sum(acc)/len(acc)
-            val_accuracy_list.append(sum(acc)/len(acc))
-            print("Val accuracy: ", val_accuracy)
-            if val_accuracy_list[-1]>val_accuracy_list[-2]:
+            # val_accuracy_list.append(sum(acc)/len(acc))
+            if val_accuracy>=best_acc:
                 best_model = self.model
+                best_acc = val_accuracy
+            else:
+                pass
+            print("Epoch ", epoch," | Current val accuracy: ", val_accuracy.item(), " | Best model's accuracy: ", best_acc.item())
                 
         return best_model
 

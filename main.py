@@ -1,25 +1,30 @@
 from genericpath import exists
 from re import L
 from trainer import Trainer
-from dataset import FaceDataset, Grooo_type_Dataloader
+from utils.dataset import FaceDataset, Grooo_type_Dataloader
 from arcface import ArcFaceModel
-from losses import ArcFaceLoss, ElasticArcFaceLoss
-from optimizer import SAM
+from utils.losses import ArcFaceLoss, ElasticArcFaceLoss
+from utils.optimizer import SAM
 
 import os
 import json
 import torch
 from PIL import ImageFile
+import argparse
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-CONFIG_FILE = "configs/arcface_train.json"
+CONFIG_FILE = "configs/arcface.json"
 
-if __name__ == '__main__':
-    with open(CONFIG_FILE, "r") as jsonfile:
-        config = json.load(jsonfile)
+def get_opt():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', type=str, default='configs/arcface.json', help='path to the config file')
+    parser.add_argument('--phase', type=str, default='train', help='train, test')
+    return parser.parse_args()
 
-    # Get train and val dataset
+def train(opt):
+    with open(opt.config, "r") as jsonfile:
+        config = json.load(jsonfile)['train']
     dataloader = Grooo_type_Dataloader(root_dir=config['root_dir'],
                                        val_size = 0.2,
                                        random_seed = 42,
@@ -51,7 +56,7 @@ if __name__ == '__main__':
                         pretrained_path=pretrained_path,
                         freeze=config['freeze_model'],
                         use_elasticloss=True,
-                        type_of_freeze='all')
+                        type_of_freeze='body_only')
 
     n_epochs = config['n_epochs']
 
@@ -59,7 +64,6 @@ if __name__ == '__main__':
         optimizer = SAM(model.parameters(), lr=1e-3, momentum=0.9)
     else:
         optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
-    
     
     trainer = Trainer(model=model,
                       n_epochs=n_epochs,
@@ -74,4 +78,11 @@ if __name__ == '__main__':
     if config['save_model']:
         if os.path('./logs') is not exists:
             os.mkdir('./logs')
-        torch.save(trained_model.state_dict(), 'logs/arcface_'+config['backbone']+'.pth')
+        path = 'logs/arcface_'+config['backbone']+'.pth'
+        torch.save(trained_model.state_dict(), path)
+        print('Model is saved at '+path)
+
+if __name__ == '__main__':
+    opt = get_opt()
+    if opt.phase == 'train':
+        train(opt)

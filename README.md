@@ -15,5 +15,5 @@ YourDatasetName
 You can find pretrained model at [link](https://drive.google.com/drive/folders/1FMXmo0I9Mhqgjn2cwyD9WcoaV0Ey65dU?usp=sharing) 
 
 ## Training
-run file ```main.py```
+In terminal, run ```$ python main.py --config configs/e_arcface.json --phase test```
 
