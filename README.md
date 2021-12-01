@@ -23,9 +23,5 @@ You can find pretrained model at [link](https://drive.google.com/drive/folders/1
 To make advanced configurations, pay your attention to the docstring :)
 
 ## Training
-<<<<<<< HEAD
-In terminal, run ```$ python main.py --config configs/e_arcface.json --phase test```
-=======
-run file ```main.py``` 
->>>>>>> ca94a9a9dc345610a2296efe5660d48539bd3f30
+In terminal, run ```$ python main.py --config configs/e_arcface.json --phase train```
 
