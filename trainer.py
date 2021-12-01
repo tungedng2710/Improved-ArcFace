@@ -11,6 +11,7 @@ class Trainer:
                  loss_function = None,
                  train_loader = None,
                  val_loader = None,
+                 device = torch.device('cpu'),
                  callbacks = None):
         assert model is not None
         assert optimizer is not None
@@ -18,7 +19,7 @@ class Trainer:
         assert train_loader is not None
         assert val_loader is not None
 
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = device
         self.model = model
         self.model.to(self.device)
         self.n_epochs = n_epochs

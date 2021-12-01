@@ -53,7 +53,7 @@ class ArcFaceModel(nn.Module):
         type_of_freeze (str): all (embedding + backbone), emb_only, body_only
         """
         super(ArcFaceModel, self).__init__()
-        print(backbone_name)
+        print("Backbone: ", backbone_name)
         if backbone_name == 'ir50': 
             self.backbone = IR_50(input_size)
         elif backbone_name == 'irse50':
@@ -67,9 +67,9 @@ class ArcFaceModel(nn.Module):
                                           out_h=7,
                                           out_w=7)
         if use_pretrained:
-            print("Freezing your model...")
             self.backbone.load_state_dict(torch.load(pretrained_path))
             if freeze:
+                print("Freezing your model...")
                 if 'irse' in backbone_name:
                     self.backbone = self.freeze_irse_backbone(self.backbone,
                                                               type_of_freeze)

@@ -16,14 +16,15 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 CONFIG_FILE = "configs/arcface.json"
 
-def get_opt():
+def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default='configs/arcface.json', help='path to the config file')
     parser.add_argument('--phase', type=str, default='train', help='train, test')
+    parser.add_argument('--device', type=str, default='0', help='train, test')
     return parser.parse_args()
 
-def train(opt):
-    with open(opt.config, "r") as jsonfile:
+def train(args):
+    with open(args.config, "r") as jsonfile:
         config = json.load(jsonfile)['train']
     dataloader = Grooo_type_Dataloader(root_dir=config['root_dir'],
                                        val_size = 0.2,
@@ -33,6 +34,8 @@ def train(opt):
 
     train_loader, val_loader = dataloader.get_dataloaders(num_worker=8)
     num_classes = dataloader.num_classes
+    device = torch.device("cuda:"+args.device if torch.cuda.is_available() else "cpu")
+    print("Device: ", device)
     print("Number of classes: {num_classes}".format(num_classes=num_classes))
 
     # Get the path of pretrained model
@@ -69,6 +72,7 @@ def train(opt):
                       n_epochs=n_epochs,
                       optimizer=optimizer,
                       loss_function=loss_function,
+                      device=device,
                       train_loader=train_loader,
                       val_loader=val_loader)
 
@@ -76,13 +80,13 @@ def train(opt):
 
     # Save the best model
     if config['save_model']:
-        if os.path('./logs') is not exists:
+        if not os.path.exists('./logs'):
             os.mkdir('./logs')
         path = 'logs/arcface_'+config['backbone']+'.pth'
         torch.save(trained_model.state_dict(), path)
         print('Model is saved at '+path)
 
 if __name__ == '__main__':
-    opt = get_opt()
-    if opt.phase == 'train':
-        train(opt)
+    args = get_args()
+    if args.phase == 'train':
+        train(args)
