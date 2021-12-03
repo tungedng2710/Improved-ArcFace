@@ -39,7 +39,6 @@ class ArcFaceLoss(nn.Module):
         one_hot.scatter_(1, label.view(-1, 1).long(), 1)
         output = input * (1 - one_hot) + target_logits * one_hot
         output = output * self.s
-
         return self.criterion(output, label)
 
 class MLLoss(nn.Module):
@@ -55,24 +54,19 @@ class MLLoss(nn.Module):
         return cos_theta
 
 class ElasticArcFaceLoss(nn.Module):
-    def __init__(self, in_features=512, out_features=1000, s=64.0, m=0.50,std=0.0125, is_cuda=True):
+    def __init__(self, in_features=512, out_features=1000, s=30.0, m=0.50,std=0.0125, is_cuda=True):
         super(ElasticArcFaceLoss, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.s = s
         self.m = m
-        # self.kernel = nn.Parameter(torch.FloatTensor(in_features, out_features))
-        # nn.init.normal_(self.kernel, std=0.01)
         self.std=std
-        self.criterion = FocalLoss()
+        self.criterion = torch.nn.CrossEntropyLoss()
         if is_cuda:
             self.criterion = self.criterion.cuda()
 
     def forward(self, input, label):
-        # embbedings = l2_norm(embbedings, axis=1).to(DEVICE)
-        # kernel_norm = l2_norm(self.kernel, axis=0).to(DEVICE)
-        # cos_theta = torch.mm(embbedings, kernel_norm)
-        cos_theta = input.clamp(-1, 1)  # for numerical stability
+        cos_theta = input.clamp(-1.0 + 1e-7, 1.0 - 1e-7)  # for numerical stability
         index = torch.where(label != -1)[0]
         m_hot = torch.zeros(index.size()[0], cos_theta.size()[1], device=cos_theta.device)
         margin = torch.normal(mean=self.m, std=self.std, size=label[index, None].size(), device=cos_theta.device) # Fast converge .clamp(self.m-self.std, self.m+self.std)
@@ -81,3 +75,12 @@ class ElasticArcFaceLoss(nn.Module):
         cos_theta[index] += m_hot
         cos_theta.cos_().mul_(self.s)
         return self.criterion(cos_theta, label) 
+
+def get_loss(name: str = 'ArcFace'):
+    if name == 'ArcFace':
+        loss_function = ArcFaceLoss()
+    elif name == 'ElasticArcFace':
+        loss_function = ElasticArcFaceLoss()
+    else:
+        pass
+    return loss_function

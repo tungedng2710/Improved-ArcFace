@@ -1,9 +1,7 @@
-from genericpath import exists
-from re import L
 from trainer import Trainer
 from utils.dataset import FaceDataset, Grooo_type_Dataloader
 from arcface import ArcFaceModel
-from utils.losses import ArcFaceLoss, ElasticArcFaceLoss
+from utils.losses import ArcFaceLoss, ElasticArcFaceLoss, get_loss
 from utils.optimizer import SAM
 
 import os
@@ -13,8 +11,6 @@ from PIL import ImageFile
 import argparse
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-
-CONFIG_FILE = "configs/arcface.json"
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -28,7 +24,7 @@ def train(args):
         config = json.load(jsonfile)['train']
     dataloader = Grooo_type_Dataloader(root_dir=config['root_dir'],
                                        val_size = 0.2,
-                                       random_seed = 42,
+                                       random_seed = 0,
                                        batch_size_train=64,
                                        batch_size_val=32)
 
@@ -45,12 +41,7 @@ def train(args):
         pretrained_path = None
 
     # init model and train it
-    if config['loss'] == 'ArcFace':
-        loss_function = ArcFaceLoss()
-        use_elasticloss = False
-    elif config['loss'] == 'ElasticArcFace':
-        loss_function = ElasticArcFaceLoss()
-        use_elasticloss = True
+    loss_function = get_loss(config['loss'])
 
     model = ArcFaceModel(backbone_name=config['backbone'], 
                         input_size=[112,112],
@@ -58,13 +49,13 @@ def train(args):
                         use_pretrained=config['use_pretrained'],
                         pretrained_path=pretrained_path,
                         freeze=config['freeze_model'],
-                        use_elasticloss=True,
                         type_of_freeze='body_only')
 
     n_epochs = config['n_epochs']
 
+    # 
     if config['use_improved_optim']:
-        optimizer = SAM(model.parameters(), lr=1e-3, momentum=0.9)
+        optimizer = SAM(model.parameters(), lr=config['learning_rate'], momentum=0.9)
     else:
         optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
     
@@ -76,13 +67,13 @@ def train(args):
                       train_loader=train_loader,
                       val_loader=val_loader)
 
-    trained_model = trainer.train(use_sam=config['use_improved_optim'], loss_verbose=False)
+    trained_model = trainer.train(use_sam=config['use_improved_optim'], verbose=True)
 
     # Save the best model
     if config['save_model']:
         if not os.path.exists('./logs'):
             os.mkdir('./logs')
-        path = 'logs/arcface_'+config['backbone']+'.pth'
+        path = 'logs/'+config['prefix']+'_'+config['backbone']+'.pth'
         torch.save(trained_model.state_dict(), path)
         print('Model is saved at '+path)
 

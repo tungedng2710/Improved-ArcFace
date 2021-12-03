@@ -6,9 +6,10 @@
         "root_dir": "./data/grooo112",
         "use_pretrained": true,
         "freeze_model": true,
-        "n_epochs": 15,
-        "use_improved_optim": true,
+        "n_epochs": 7,
+        "use_improved_optim": false,
         "learning_rate": 5e-4,
+        "prefix": "arcface",
         "save_model": true
     }
 }

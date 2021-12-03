@@ -15,8 +15,8 @@ def l2_norm(input, axis = 1):
     output = torch.div(input, norm)
     return output
 
-def freeze_module(model):
-    for param in model.parameters():
+def freeze_module(module):
+    for param in module.parameters():
         param.requires_grad = False
 
 class NormalizedLinear(nn.Module):
@@ -29,17 +29,16 @@ class NormalizedLinear(nn.Module):
         nn.init.xavier_uniform_(self.W)
 
     def forward(self, input):
-        x = F.normalize(input)
-        W = F.normalize(self.W)
+        x = l2_norm(input)
+        W = l2_norm(self.W)
         return F.linear(x, W)
 
 class ArcFaceModel(nn.Module):
     def __init__(self, 
-                backbone_name: str = 'ir50', 
+                backbone_name: str = 'irse50', 
                 num_classes: int = 1000, 
                 input_size: list = [112, 112],
                 use_pretrained: bool = True,
-                use_elasticloss: bool = False,
                 pretrained_path: str = None,
                 freeze: bool = True,
                 type_of_freeze: str= "all"):
@@ -48,7 +47,6 @@ class ArcFaceModel(nn.Module):
         input_size (list): input image size; example: [112, 112]  
         num_classes (int): number of face id
         use_pretrained (bool): use pretrained model
-        use_elasticloss (bool): use ElasticArcFace loss for training
         freeze (bool): freeze feature extractor
         type_of_freeze (str): all (embedding + backbone), emb_only, body_only
         """
@@ -77,12 +75,7 @@ class ArcFaceModel(nn.Module):
                     self.backbone = self.freeze_mobilenet_backbone(self.backbone,
                                                                    type_of_freeze)
     
-        self.use_elasticloss = use_elasticloss
-        if self.use_elasticloss:
-            self.kernel = nn.Parameter(torch.FloatTensor(512, num_classes))
-            nn.init.normal_(self.kernel, std=0.01)
-        else:
-            self.linear = NormalizedLinear(in_features=512, out_features=num_classes)
+        self.fc = NormalizedLinear(in_features=512, out_features=num_classes)
 
     def freeze_irse_backbone(self,
                              irse_backbone = None, 
@@ -115,11 +108,6 @@ class ArcFaceModel(nn.Module):
         return mobile_backbone
 
     def forward(self, x):
-        if self.use_elasticloss:
-            embbedings = l2_norm(self.backbone(x), axis=1)
-            kernel_norm = l2_norm(self.kernel, axis=0)
-            return torch.mm(embbedings, kernel_norm)
-        else:
-            x = self.backbone(x)
-            return self.linear(x)
+        x = self.backbone(x)
+        return self.fc(x)
 

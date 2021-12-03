@@ -11,7 +11,7 @@ class Trainer:
                  loss_function = None,
                  train_loader = None,
                  val_loader = None,
-                 device = torch.device('cpu'),
+                 device = torch.device('cuda:0'),
                  callbacks = None):
         assert model is not None
         assert optimizer is not None
@@ -33,7 +33,7 @@ class Trainer:
         scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
         return scheduler        
 
-    def train(self, loss_verbose = False, use_sam = False):
+    def train(self, verbose = False, use_sam = False):
         best_model = self.model
         best_acc = -1
         # scheduler = self.schedule_lr(self.optimizer)
@@ -55,8 +55,7 @@ class Trainer:
                     loss.backward()
                     self.optimizer.step()
                     # scheduler.step()
-                if loss_verbose:
-                    print("iter ", idx, "Train loss: ", loss.item())
+                    # print("iter ", idx, "Train loss: ", loss.item())
 
             acc = []
             for idx, (image, y_val) in enumerate(self.val_loader):
@@ -68,7 +67,8 @@ class Trainer:
                 best_acc = val_accuracy
             else:
                 pass
-            print("Epoch ", epoch," | Current val accuracy: ", val_accuracy.item(), " | Best model's accuracy: ", best_acc.item())
+            if verbose:
+                print("Epoch ", epoch+1," | Current val accuracy: ", val_accuracy.item(), " | Best accuracy: ", best_acc.item())
                 
         return best_model
 

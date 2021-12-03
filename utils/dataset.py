@@ -5,29 +5,9 @@ import random
 import torch
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
-# from torchvision.transforms.autoaugment.AutoAugmentPolicy import imagenet
 
 import matplotlib.pyplot as plt
 from PIL import Image
-
-# class CelebA(Dataset):
-#     def __init__(self, device: int = 0, root_dir: str = "/path/to/your/dataset/folder"):
-#         super(CelebA, self).__init__()
-#         self.transform = transforms.Compose(
-#             [
-#              transforms.RandomHorizontalFlip(),
-#              transforms.ToTensor(),
-#              # transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-#              transforms.Normalize(mean = [0.485, 0.456, 0.406],
-#                                   std = [0.229, 0.224, 0.225]),
-#              ])
-#         self.root_dir = root_dir
-        
-#     def __getitem__(self, index):
-#         pass
-
-#     def __len__(self):
-#         pass
 
 class FaceDataset(Dataset):
     def __init__(self, device: int = 0, root_dir: str = "/path/to/your/dataset/folder"):
@@ -108,14 +88,4 @@ class Grooo_type_Dataloader:
                                                     num_workers = num_worker)
         return train_loader, val_loader
 
-
-if __name__ == '__main__':
-    grooo_dataset=FaceDataset(root_dir="data/Grooo")
-    print(grooo_dataset.name2id)
-    # sample = grooo_dataset.__getitem__(0)
-    # train_size = int(0.8 * len(grooo_dataset))
-    # test_size = len(grooo_dataset) - train_size
-    # train_dataset, test_dataset = torch.utils.data.random_split(grooo_dataset, [train_size, test_size])
-
-    # print(train_dataset.__getitem__(1)[0])
     

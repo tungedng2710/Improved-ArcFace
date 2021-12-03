@@ -1,14 +1,15 @@
 {
     "train": {
         "loss": "ElasticArcFace", 
-        "backbone": "mobilenet",
-        "pretrained_model_path": "./weights/mobilenet.pth",
+        "backbone": "irse50",
+        "pretrained_model_path": "./weights/irse50.pth",
         "root_dir": "./data/grooo112",
         "use_pretrained": true,
         "freeze_model": true,
-        "n_epochs": 2,
-        "use_improved_optim": true,
+        "n_epochs": 15,
+        "use_improved_optim": false,
         "learning_rate": 5e-4,
+        "prefix": "e_arcface", 
         "save_model": true
     }
 }
