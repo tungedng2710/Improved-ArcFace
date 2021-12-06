@@ -26,7 +26,8 @@ def train(args):
                                        val_size = 0.2,
                                        random_seed = 0,
                                        batch_size_train=64,
-                                       batch_size_val=32)
+                                       batch_size_val=32,
+                                       save_label_dict=True)
 
     train_loader, val_loader = dataloader.get_dataloaders(num_worker=8)
     num_classes = dataloader.num_classes

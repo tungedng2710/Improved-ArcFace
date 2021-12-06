@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import random
+import pickle
 
 import torch
 from torch.utils.data import DataLoader, Dataset
@@ -10,7 +11,9 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 class FaceDataset(Dataset):
-    def __init__(self, device: int = 0, root_dir: str = "/path/to/your/dataset/folder"):
+    def __init__(self,
+                 save_label_dict: bool = False,
+                 root_dir: str = "/path/to/your/dataset/folder"):
         super(FaceDataset, self).__init__()
         self.transform = transforms.Compose(
             [
@@ -21,12 +24,21 @@ class FaceDataset(Dataset):
             #                       std = [0.229, 0.224, 0.225]),
              ])
         self.root_dir = root_dir
-        self.device = device
         self.list_data, self.id2name = self.preload()
         self.num_classes = len(os.listdir(root_dir))
     
     def convert_id2name(self, id):
         return self.id2name[str(id)]
+
+    def save_label_dict(self):
+        '''
+        Save the dictionary of labels to a pkl file
+        '''
+        label_dict = {i: self.convert_id2name(i) for i in range(self.num_classes)}
+        if not os.path.exists('./logs'):
+            os.mkdir('./logs')
+        with open('./logs/label_dict.pkl', 'wb') as f:
+            pickle.dump(label_dict, f)
 
     def preload(self):
         list_data = []
@@ -65,7 +77,8 @@ class Grooo_type_Dataloader:
                  val_size = 0.2, 
                  random_seed = 0,
                  batch_size_train = 64,
-                 batch_size_val = 32):
+                 batch_size_val = 32,
+                 save_label_dict = False):
         self.dataset = FaceDataset(root_dir=root_dir)
         self.num_classes = self.dataset.num_classes
         self.val_size = int(val_size * self.dataset.__len__())
@@ -75,6 +88,8 @@ class Grooo_type_Dataloader:
                                                                      [self.train_size, self.val_size])
         self.batch_size_train = batch_size_train
         self.batch_size_val = batch_size_val
+        if save_label_dict:
+            self.dataset.save_label_dict()
 
     def get_dataloaders(self, num_worker = 8):
         train_loader = torch.utils.data.DataLoader(self.train_set,
@@ -87,5 +102,3 @@ class Grooo_type_Dataloader:
                                                     shuffle = False,
                                                     num_workers = num_worker)
         return train_loader, val_loader
-
-    
