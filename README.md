@@ -2,7 +2,7 @@
 **Reference:** https://github.com/deepinsight/insightface (Official repository of ArcFace) 
 
 ## Preparation
-Create your dataset like the example below:<br/>
+Create your dataset like the [sample dataset](https://drive.google.com/file/d/1D9Wt6horQdrFdRAMxc3CdYkKHulV00Up/view?usp=sharing):<br/>
 ```
 data
 --YourDatasetName
@@ -13,9 +13,10 @@ data
   --Label 2
   ----...
 ```
+
 You can find pretrained model at [link](https://drive.google.com/drive/folders/1FMXmo0I9Mhqgjn2cwyD9WcoaV0Ey65dU?usp=sharing) <br />
 
-For face alignment, run ```$python align_face.py --root_dir /path/to/dataset/folder --dst_w 112 --dst_h 112``` (You can change the destination size ```--dst_w``` is output width and ```--dst_h``` is output height)
+For face alignment, run ```$python align_face.py --root_dir /path/to/dataset/folder --dst_w 112 --dst_h 112``` (You can change the destination size ```--dst_w``` is output width and ```--dst_h``` is output height) 
 
 ## Configuration 
 * ```loss```: Now you can choose ```ArcFace``` or ```ElasticArcFace```. Several other losses are in progress. <br/>
