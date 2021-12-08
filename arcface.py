@@ -1,20 +1,16 @@
-from backbone.model_irse import IR_50, IR_SE_50, IR_101, IR_SE_101, IR_152, IR_SE_152
-from backbone.model_resnet import ResNet_50, ResNet_101
+from backbone.IRSE import IR_50, IR_SE_50, IR_101, IR_SE_101, IR_152, IR_SE_152
+from backbone.ResNet import ResNet_50, ResNet_101
+from backbone.InvertibleResNet import iresnet18, iresnet34, iresnet50
 from backbone.MobileFaceNets import MobileFaceNet
+from backbone.GhostNet import GhostNet
+from backbone.AttentionNets import ResidualAttentionNet
 
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from PIL import ImageFile
-ImageFile.LOAD_TRUNCATED_IMAGES = True
-
 torch.manual_seed(0)
-
-def l2_norm(input, axis = 1):
-    norm = torch.norm(input, 2, axis, True)
-    output = torch.div(input, norm)
-    return output
 
 def freeze_module(module):
     for param in module.parameters():
@@ -30,8 +26,8 @@ class NormalizedLinear(nn.Module):
         nn.init.xavier_uniform_(self.W)
 
     def forward(self, input):
-        x = l2_norm(input)
-        W = l2_norm(self.W)
+        x = F.normalize(input)
+        W = F.normalize(self.W)
         return F.linear(x, W)
 
 class ArcFaceModel(nn.Module):
@@ -42,6 +38,7 @@ class ArcFaceModel(nn.Module):
                 use_pretrained: bool = False,
                 pretrained_model_path: str = None,
                 freeze: bool = True,
+                embedding_size: int = 512,
                 type_of_freeze: str= "all"):
         """
         backbone (str): ir50, irse50, irse101, irse152, mobilenet, resnet50, resnet101
@@ -53,6 +50,7 @@ class ArcFaceModel(nn.Module):
         """
         super(ArcFaceModel, self).__init__()
         print("Backbone: ", backbone_name)
+        # IRSE 
         if backbone_name == 'ir50': 
             self.backbone = IR_50(input_size)
         elif backbone_name == 'irse50':
@@ -61,16 +59,36 @@ class ArcFaceModel(nn.Module):
             self.backbone = IR_SE_101(input_size)
         elif backbone_name == 'irse152':
             self.backbone = IR_SE_152(input_size)
+        # ResNet 
         elif backbone_name == 'resnet50': 
             self.backbone = ResNet_50(input_size)
         elif backbone_name == 'resnet101':
             self.backbone = ResNet_101(input_size)
+        # Invertible ResNet 
+        elif backbone_name == 'iresnet18': 
+            self.backbone = iresnet18()
+        elif backbone_name == 'iresnet50':
+            self.backbone = iresnet50()
+        # Others
         elif backbone_name == 'mobilenet':
-            self.backbone = MobileFaceNet(embedding_size=512,
+            self.backbone = MobileFaceNet(embedding_size=embedding_size,
                                           out_h=7,
                                           out_w=7)
+        elif backbone_name == 'ghostnet':
+            self.backbone = GhostNet()
+        elif backbone_name == 'attresnet':
+            self.backbone = ResidualAttentionNet(stage1_modules=1,
+                                                 stage2_modules=1,
+                                                 stage3_modules=1,
+                                                 feat_dim=embedding_size,
+                                                 out_h=7,
+                                                 out_w=7)
+
         if use_pretrained:
-            self.backbone.load_state_dict(torch.load(pretrained_model_path))
+            try:
+                self.backbone.load_state_dict(torch.load(pretrained_model_path))
+            except:
+                print('No suitable pretrained model found, the arcface model will be trained from scratch!')
             if freeze:
                 print("Freezing your model...")
                 if 'irse' in backbone_name:
@@ -82,7 +100,8 @@ class ArcFaceModel(nn.Module):
                 elif (backbone_name == 'resnet50') | (backbone_name == 'resnet101'):
                     self.backbone = self.freeze_resnet_backbone(self.backbone,
                                                                 type_of_freeze)
-    
+                else:
+                    print(backbone_name+' has not been supported to freeze!')
         self.fc = NormalizedLinear(in_features=512, out_features=num_classes)
 
     def freeze_irse_backbone(self,

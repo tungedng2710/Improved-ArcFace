@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 from torch.optim.lr_scheduler import LambdaLR, StepLR
 from tqdm import tqdm
+import datetime
+import os
 
 class Trainer:
     def __init__(self,
@@ -81,3 +83,11 @@ class Trainer:
             y_probs = torch.softmax(logits, dim = 1) 
             correct = (torch.argmax(y_probs, dim =1 ) == y_val).type(torch.FloatTensor)
         return correct.mean()
+
+    def save_trained_model(self, trained_model, prefix, backbone_name):
+        now = '{0:%Y%m%d}'.format(datetime.datetime.now())
+        if not os.path.exists('./logs/'+now):
+            os.mkdir('./logs/'+now)
+        path = 'logs/'+now+'/'+prefix+'_'+backbone_name+'.pth'
+        torch.save(trained_model.state_dict(), path)
+        print('Model is saved at '+path)

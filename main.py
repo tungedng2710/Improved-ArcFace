@@ -4,6 +4,7 @@ from arcface import ArcFaceModel
 from utils.losses import ArcFaceLoss, ElasticArcFaceLoss, get_loss
 from utils.optimizer import SAM
 
+import datetime
 import os
 import json
 import torch
@@ -26,8 +27,8 @@ def train(args):
     dataloader = Grooo_type_Dataloader(root_dir=config['root_dir'],
                                        val_size = 0.2,
                                        random_seed = 0,
-                                       batch_size_train=64,
-                                       batch_size_val=32,
+                                       batch_size_train=config['batch_size_train'],
+                                       batch_size_val=config['batch_size_val'],
                                        save_label_dict=True)
 
     train_loader, val_loader = dataloader.get_dataloaders(num_worker=config['num_worker'])
@@ -52,15 +53,17 @@ def train(args):
                         pretrained_model_path=pretrained_model_path,
                         freeze=config['freeze_model'],
                         type_of_freeze='body_only')
-
+    pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print('Number of trainable parameters: ', pytorch_total_params)
     n_epochs = config['n_epochs']
 
-    # 
+    # Get optimizer
     if config['use_improved_optim']:
         optimizer = SAM(model.parameters(), lr=config['learning_rate'], momentum=0.9)
     else:
         optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
     
+    # Initialize Trainer and train model
     trainer = Trainer(model=model,
                       n_epochs=n_epochs,
                       optimizer=optimizer,
@@ -73,11 +76,7 @@ def train(args):
 
     # Save the best model
     if config['save_model']:
-        if not os.path.exists('./logs'):
-            os.mkdir('./logs')
-        path = 'logs/'+config['prefix']+'_'+config['backbone']+'.pth'
-        torch.save(trained_model.state_dict(), path)
-        print('Model is saved at '+path)
+        trainer.save_trained_model(trained_model, config['prefix'], config['backbone'])
 
 def test(args):
     device = torch.device("cuda:"+args.device if torch.cuda.is_available() else "cpu")
