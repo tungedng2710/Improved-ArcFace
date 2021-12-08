@@ -2,7 +2,7 @@ from trainer import Trainer
 from utils.dataset import FaceDataset, Grooo_type_Dataloader
 from arcface import ArcFaceModel
 from utils.losses import ArcFaceLoss, ElasticArcFaceLoss, get_loss
-from utils.optimizer import SAM
+from utils.optimizer import SAM, Lamb
 
 import datetime
 import os
@@ -58,8 +58,10 @@ def train(args):
     n_epochs = config['n_epochs']
 
     # Get optimizer
-    if config['use_improved_optim']:
+    if config['use_sam_optim']:
         optimizer = SAM(model.parameters(), lr=config['learning_rate'], momentum=0.9)
+    elif config['use_lamb_optim']:
+        optimizer = Lamb(model.parameters(), lr=config['learning_rate'], weight_decay=1e-5)
     else:
         optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
     
@@ -72,7 +74,7 @@ def train(args):
                       train_loader=train_loader,
                       val_loader=val_loader)
 
-    trained_model = trainer.train(use_sam=config['use_improved_optim'], verbose=True)
+    trained_model = trainer.train(use_sam=config['use_sam_optim'], verbose=True)
 
     # Save the best model
     if config['save_model']:
