@@ -21,10 +21,11 @@ For face alignment, run ```$python align_face.py --root_dir /path/to/dataset/fol
 ## Configuration 
 ### Train
 * ```loss```: Now you can choose ```ArcFace``` or ```ElasticArcFace```. Several other losses are in progress. <br/>
-* ```backbone```: ```irse50``` and ```mobilenet``` have pretrained models at [link](https://drive.google.com/drive/folders/1FMXmo0I9Mhqgjn2cwyD9WcoaV0Ey65dU?usp=sharing). Some other backbones are listed in the doctring of ```ArcFaceModel``` class, but you have to train them from scratch. <br/>
+* ```backbone```: ```irse50``` and ```mobilenet``` have pretrained models on insightface's datasets at [link](https://drive.google.com/drive/folders/1FMXmo0I9Mhqgjn2cwyD9WcoaV0Ey65dU?usp=sharing). Some other backbones are listed in the doctring of ```ArcFaceModel``` class, but you have to train them from scratch. <br/>
 * ```root_dir```: The path to the directory of train dataset <br/>
-* ```use_improved_optim```: use SAM Optimizer for training (set its value is ```true``` if you don't want to use Adam optimizer). You can find the original implementation at [link](https://github.com/davda54/sam) <br/>
-To make advanced configurations, pay your attention to the docstring :)
+* ```use_sam_optim```: use SAM Optimizer for training (set its value is ```true``` if you don't want to use Adam optimizer). You can find the original implementation at [link](https://github.com/davda54/sam) <br/>
+* ```use_lamb_optim```: use Lamb Optimizer for training (set its value is ```true``` if you don't want to use Adam optimizer). You can find the original implementation at [link](https://github.com/cybertronai/pytorch-lamb/blob/master/pytorch_lamb/lamb.py) <br/>
+Note: Don't set the values of ```use_sam_optim``` and  ```use_sam_optim``` are ```true``` simultaneously. To make advanced configurations, pay your attention to the docstrings :)
 ### Test
 * ```trainset_path```: It is the same as ```root_dir``` in training phase <br/>
 * ```testset_path```: The path to the directory of test dataset <br/>

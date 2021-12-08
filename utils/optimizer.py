@@ -1,7 +1,6 @@
 # base on:
 # SAM: https://github.com/davda54/sam
-# Lamb: https://github.com/skyday123/pytorch-lamb/blob/master/pytorch_lamb/lamb.py
-
+# Lamb: https://github.com/cybertronai/pytorch-lamb/blob/master/pytorch_lamb/lamb.py
 import torch
 
 class SAM(torch.optim.Optimizer):
