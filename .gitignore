@@ -131,6 +131,7 @@ dmypy.json
 # Weights, logs and test file
 data/*
 logs/*.pt*
+logs/*pkl
 weights/*.pt*
 *ipynb*
 verification.py

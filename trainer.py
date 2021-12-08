@@ -77,6 +77,7 @@ class Trainer:
         y_val = y_val.to(self.device)
         self.model.eval()
         with torch.no_grad():
-            y_pred = self.model(X_val)
-            correct = (torch.argmax(y_pred, dim=1) == y_val).type(torch.FloatTensor)
+            logits = self.model(X_val)
+            y_probs = torch.softmax(logits, dim = 1) 
+            correct = (torch.argmax(y_probs, dim =1 ) == y_val).type(torch.FloatTensor)
         return correct.mean()

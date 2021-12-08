@@ -1,4 +1,5 @@
 from backbone.model_irse import IR_50, IR_SE_50, IR_101, IR_SE_101, IR_152, IR_SE_152
+from backbone.model_resnet import ResNet_50, ResNet_101
 from backbone.MobileFaceNets import MobileFaceNet
 
 import torch
@@ -38,12 +39,12 @@ class ArcFaceModel(nn.Module):
                 backbone_name: str = 'irse50', 
                 num_classes: int = 1000, 
                 input_size: list = [112, 112],
-                use_pretrained: bool = True,
-                pretrained_path: str = None,
+                use_pretrained: bool = False,
+                pretrained_model_path: str = None,
                 freeze: bool = True,
                 type_of_freeze: str= "all"):
         """
-        backbone (str): ir50, irse50, irse101, irse152, mobilenet
+        backbone (str): ir50, irse50, irse101, irse152, mobilenet, resnet50, resnet101
         input_size (list): input image size; example: [112, 112]  
         num_classes (int): number of face id
         use_pretrained (bool): use pretrained model
@@ -60,12 +61,16 @@ class ArcFaceModel(nn.Module):
             self.backbone = IR_SE_101(input_size)
         elif backbone_name == 'irse152':
             self.backbone = IR_SE_152(input_size)
+        elif backbone_name == 'resnet50': 
+            self.backbone = ResNet_50(input_size)
+        elif backbone_name == 'resnet101':
+            self.backbone = ResNet_101(input_size)
         elif backbone_name == 'mobilenet':
             self.backbone = MobileFaceNet(embedding_size=512,
                                           out_h=7,
                                           out_w=7)
         if use_pretrained:
-            self.backbone.load_state_dict(torch.load(pretrained_path))
+            self.backbone.load_state_dict(torch.load(pretrained_model_path))
             if freeze:
                 print("Freezing your model...")
                 if 'irse' in backbone_name:
@@ -74,6 +79,9 @@ class ArcFaceModel(nn.Module):
                 elif 'mobile' in backbone_name:
                     self.backbone = self.freeze_mobilenet_backbone(self.backbone,
                                                                    type_of_freeze)
+                elif (backbone_name == 'resnet50') | (backbone_name == 'resnet101'):
+                    self.backbone = self.freeze_resnet_backbone(self.backbone,
+                                                                type_of_freeze)
     
         self.fc = NormalizedLinear(in_features=512, out_features=num_classes)
 
@@ -106,6 +114,22 @@ class ArcFaceModel(nn.Module):
         else:
             freeze_module(mobile_backbone)
         return mobile_backbone
+    
+    def freeze_resnet_backbone(self, 
+                                resnet_backbone = None,
+                                type_of_freeze = 'all'):
+        
+        if type_of_freeze == 'all':
+            freeze_module(resnet_backbone)
+        elif type_of_freeze == 'body_only':
+            i = 0
+            for child in resnet_backbone.children():
+                if i < 10:
+                    freeze_module(child)
+                i=i+1
+        else:
+            freeze_module(resnet_backbone)
+        return resnet_backbone
 
     def forward(self, x):
         x = self.backbone(x)

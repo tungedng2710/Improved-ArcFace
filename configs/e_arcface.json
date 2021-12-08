@@ -4,12 +4,21 @@
         "backbone": "irse50",
         "pretrained_model_path": "./weights/irse50.pth",
         "root_dir": "./data/grooo112",
+        "num_worker": 8,
         "use_pretrained": true,
         "freeze_model": true,
-        "n_epochs": 15,
+        "n_epochs": 10,
         "use_improved_optim": false,
         "learning_rate": 5e-4,
-        "prefix": "e_arcface", 
+        "prefix": "e_arcface",
         "save_model": true
+    },
+    "test": {
+        "trainset_path": "./data/grooo112",
+        "testset_path": "./data/asian_masked",
+        "backbone": "irse50",
+        "pretrained_model_path": "./logs/e_arcface_irse50.pth",
+        "num_worker": 8,
+        "batch_size": 32
     }
 }
