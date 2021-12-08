@@ -1,4 +1,4 @@
-# ArcFace_pytorch: A simple implementation of ArcFace model
+# Improved ArcFace: Some improvements on ArcFace model
 **Reference:** https://github.com/deepinsight/insightface (Official repository of ArcFace) 
 
 ## Preparation
