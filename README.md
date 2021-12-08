@@ -19,12 +19,19 @@ You can find pretrained model at [link](https://drive.google.com/drive/folders/1
 For face alignment, run ```$python align_face.py --root_dir /path/to/dataset/folder --dst_w 112 --dst_h 112``` (You can change the destination size ```--dst_w``` is output width and ```--dst_h``` is output height) 
 
 ## Configuration 
+### Train
 * ```loss```: Now you can choose ```ArcFace``` or ```ElasticArcFace```. Several other losses are in progress. <br/>
 * ```backbone```: ```irse50``` and ```mobilenet``` have pretrained models at [link](https://drive.google.com/drive/folders/1FMXmo0I9Mhqgjn2cwyD9WcoaV0Ey65dU?usp=sharing). Some other backbones are listed in the doctring of ```ArcFaceModel``` class, but you have to train them from scratch. <br/>
-* ```root_dir```: The path to the directory of dataset <br/>
+* ```root_dir```: The path to the directory of train dataset <br/>
 * ```use_improved_optim```: use SAM Optimizer for training (set its value is ```true``` if you don't want to use Adam optimizer). You can find the original implementation at [link](https://github.com/davda54/sam) <br/>
 To make advanced configurations, pay your attention to the docstring :)
+### Test
+* ```trainset_path```: It is the same as ```root_dir``` in training phase <br/>
+* ```testset_path```: The path to the directory of test dataset <br/>
 
 ## Training
-In terminal, run ```$ python main.py --config configs/e_arcface.json --phase train```
+In terminal, run ```$ python main.py --config ./path/to/config/file.json --phase train --device 0```
+
+## Testing
+In terminal, run ```$ python main.py --config ./path/to/config/file.json --phase test --device 0```
 
