@@ -10,7 +10,8 @@
         "batch_size_train": 32,
         "batch_size_val": 32,
         "n_epochs": 5,
-        "use_improved_optim": false,
+        "use_sam_optim": false,
+        "use_lamb_optim": true,
         "learning_rate": 5e-4,
         "prefix": "arcface",
         "save_model": true

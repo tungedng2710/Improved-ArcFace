@@ -8,7 +8,7 @@
         "use_pretrained": true,
         "freeze_model": true,
         "n_epochs": 10,
-        "use_improved_optim": false,
+        "use_sam_optim": false,
         "learning_rate": 5e-4,
         "prefix": "e_arcface",
         "save_model": true
