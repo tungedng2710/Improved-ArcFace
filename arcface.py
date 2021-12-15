@@ -89,6 +89,7 @@ class ArcFaceModel(nn.Module):
                 self.backbone.load_state_dict(torch.load(pretrained_model_path))
             except:
                 print('No suitable pretrained model found, the arcface model will be trained from scratch!')
+                freeze = False
             if freeze:
                 print("Freezing your model...")
                 if 'irse' in backbone_name:

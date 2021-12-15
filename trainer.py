@@ -78,16 +78,19 @@ class Trainer:
         X_val = X_val.to(self.device)
         y_val = y_val.to(self.device)
         self.model.eval()
-        with torch.no_grad():
-            logits = self.model(X_val)
-            y_probs = torch.softmax(logits, dim = 1) 
-            correct = (torch.argmax(y_probs, dim =1 ) == y_val).type(torch.FloatTensor)
+        target = self.model(X_val)
+        loss = self.loss_function(target, y_val)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        y_probs = torch.softmax(target, dim = 1) 
+        correct = (torch.argmax(y_probs, dim =1 ) == y_val).type(torch.FloatTensor)
         return correct.mean()
 
-    def save_trained_model(self, trained_model, prefix, backbone_name):
+    def save_trained_model(self, trained_model, prefix, backbone_name, num_classes):
         now = '{0:%Y%m%d}'.format(datetime.datetime.now())
         if not os.path.exists('./logs/'+now):
             os.mkdir('./logs/'+now)
-        path = 'logs/'+now+'/'+prefix+'_'+backbone_name+'.pth'
+        path = 'logs/'+now+'/'+prefix+'_'+backbone_name+'_'+str(num_classes)+'.pth'
         torch.save(trained_model.state_dict(), path)
         print('Model is saved at '+path)
