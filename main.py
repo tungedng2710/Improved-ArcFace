@@ -78,7 +78,7 @@ def train(args):
 
     # Save the best model
     if config['save_model']:
-        trainer.save_trained_model(trained_model, config['prefix'], config['backbone'])
+        trainer.save_trained_model(trained_model, config['prefix'], config['backbone'], num_classes)
 
 def test(args):
     device = torch.device("cuda:"+args.device if torch.cuda.is_available() else "cpu")
