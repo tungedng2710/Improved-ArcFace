@@ -20,14 +20,14 @@
         "use_lamb_optim": false,
         "learning_rate": 5e-4,
         "prefix": "arcface",
-        "save_model": false,
-        "verbose": true
+        "save_model": true,
+        "verbose": 1
     },
     "test": {
-        "trainset_path": "./data/grooo112",
-        "testset_path": "./data/asian_masked",
-        "backbone": "irse50",
-        "pretrained_model_path": "./logs/arcface_irse50.pth",
+        "trainset_path": "./data/datav2",
+        "testset_path": "./data/datav2",
+        "backbone": "mobilenet",
+        "pretrained_model_path": "./logs/20211215/arcface_mobilenet.pth",
         "num_worker": 8,
         "batch_size": 32
     }

@@ -21,7 +21,7 @@
         "learning_rate": 5e-4,
         "prefix": "e_arcface",
         "save_model": true,
-        "verbose": true
+        "verbose": 1
     },
     "test": {
         "trainset_path": "./data/grooo112",

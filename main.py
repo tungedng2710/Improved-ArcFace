@@ -1,5 +1,5 @@
 from trainer import Trainer
-from utils.dataset import FaceDataset, Grooo_type_Dataloader
+from utils.dataset import FaceDataset, FaceDataloader
 from arcface import ArcFaceModel
 from utils.losses import ArcFaceLoss, ElasticArcFaceLoss, get_loss
 from utils.optimizer import SAM, Lamb
@@ -24,12 +24,12 @@ def get_args():
 def train(args):
     with open(args.config, "r") as jsonfile:
         config = json.load(jsonfile)['train']
-    dataloader = Grooo_type_Dataloader(root_dir=config['root_dir'],
-                                       val_size = 0.2,
-                                       random_seed = 0,
-                                       batch_size_train=config['batch_size_train'],
-                                       batch_size_val=config['batch_size_val'],
-                                       save_label_dict=True)
+    dataloader = FaceDataloader(root_dir=config['root_dir'],
+                                val_size = 0.2,
+                                random_seed = 0,
+                                batch_size_train=config['batch_size_train'],
+                                batch_size_val=config['batch_size_val'],
+                                save_label_dict=True)
 
     train_loader, val_loader = dataloader.get_dataloaders(num_worker=config['num_worker'])
     num_classes = dataloader.num_classes
@@ -86,8 +86,8 @@ def test(args):
     device = torch.device("cuda:"+args.device if torch.cuda.is_available() else "cpu")
     with open(args.config, "r") as jsonfile:
         config = json.load(jsonfile)['test']
-    train_set = FaceDataset(root_dir=config['trainset_path'])
-    test_set = FaceDataset(root_dir=config['testset_path'])
+    train_set = FaceDataset(root_dir=config['trainset_path'], for_training=False)
+    test_set = FaceDataset(root_dir=config['testset_path'], for_training=False)
     test_loader = torch.torch.utils.data.DataLoader(test_set,
                                                     batch_size = config['batch_size'],
                                                     shuffle = False,
