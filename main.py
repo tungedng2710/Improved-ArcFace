@@ -59,11 +59,13 @@ def train(args):
 
     # Get optimizer
     if config['use_sam_optim']:
-        optimizer = SAM(model.parameters(), lr=config['learning_rate'], momentum=0.9)
+        optimizer = SAM(model.parameters(), 
+                        lr=config['learning_rate'], 
+                        momentum=config['sam_optim']['momentum'])
     elif config['use_lamb_optim']:
         optimizer = Lamb(model.parameters(), lr=config['learning_rate'], weight_decay=1e-5)
     else:
-        optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
+        optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'], weight_decay=1e-5)
     
     # Initialize Trainer and train model
     trainer = Trainer(model=model,
@@ -74,7 +76,7 @@ def train(args):
                       train_loader=train_loader,
                       val_loader=val_loader)
 
-    trained_model = trainer.train(use_sam=config['use_sam_optim'], verbose=True)
+    trained_model = trainer.train(use_sam_optim=config['use_sam_optim'], verbose=config['verbose'])
 
     # Save the best model
     if config['save_model']:

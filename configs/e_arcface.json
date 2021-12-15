@@ -1,23 +1,33 @@
 {
     "train": {
         "loss": "ElasticArcFace", 
-        "backbone": "irse50",
-        "pretrained_model_path": "./weights/irse50.pth",
-        "root_dir": "./data/grooo112",
-        "num_worker": 8,
+        "backbone": "mobilenet",
         "use_pretrained": true,
+        "pretrained_model_path": "./weights/mobilenet.pth",
+        "root_dir": "./data/datav2",
+        "num_worker": 8,
         "freeze_model": true,
-        "n_epochs": 10,
-        "use_sam_optim": false,
+        "batch_size_train": 64,
+        "batch_size_val": 64,
+        "n_epochs": 30,
+        "use_sam_optim": true,
+        "sam_optim":
+        {
+            "momentum": 0.9,
+            "rho": 0.05,
+            "adaptive": false
+        },
+        "use_lamb_optim": false,
         "learning_rate": 5e-4,
         "prefix": "e_arcface",
-        "save_model": true
+        "save_model": true,
+        "verbose": true
     },
     "test": {
         "trainset_path": "./data/grooo112",
         "testset_path": "./data/asian_masked",
         "backbone": "irse50",
-        "pretrained_model_path": "./logs/e_arcface_irse50.pth",
+        "pretrained_model_path": "./logs/arcface_irse50.pth",
         "num_worker": 8,
         "batch_size": 32
     }
