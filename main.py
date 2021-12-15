@@ -1,5 +1,5 @@
 from trainer import Trainer
-from utils.dataset import FaceDataset, Grooo_type_Dataloader
+from utils.dataset import FaceDataset, FaceDataloader
 from arcface import ArcFaceModel
 from utils.losses import ArcFaceLoss, ElasticArcFaceLoss, get_loss
 from utils.optimizer import SAM, Lamb
@@ -24,12 +24,12 @@ def get_args():
 def train(args):
     with open(args.config, "r") as jsonfile:
         config = json.load(jsonfile)['train']
-    dataloader = Grooo_type_Dataloader(root_dir=config['root_dir'],
-                                       val_size = 0.2,
-                                       random_seed = 0,
-                                       batch_size_train=config['batch_size_train'],
-                                       batch_size_val=config['batch_size_val'],
-                                       save_label_dict=True)
+    dataloader = FaceDataloader(root_dir=config['root_dir'],
+                                val_size = 0.2,
+                                random_seed = 0,
+                                batch_size_train=config['batch_size_train'],
+                                batch_size_val=config['batch_size_val'],
+                                save_label_dict=True)
 
     train_loader, val_loader = dataloader.get_dataloaders(num_worker=config['num_worker'])
     num_classes = dataloader.num_classes
@@ -59,11 +59,13 @@ def train(args):
 
     # Get optimizer
     if config['use_sam_optim']:
-        optimizer = SAM(model.parameters(), lr=config['learning_rate'], momentum=0.9)
+        optimizer = SAM(model.parameters(), 
+                        lr=config['learning_rate'], 
+                        momentum=config['sam_optim']['momentum'])
     elif config['use_lamb_optim']:
         optimizer = Lamb(model.parameters(), lr=config['learning_rate'], weight_decay=1e-5)
     else:
-        optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
+        optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'], weight_decay=1e-5)
     
     # Initialize Trainer and train model
     trainer = Trainer(model=model,
@@ -74,7 +76,7 @@ def train(args):
                       train_loader=train_loader,
                       val_loader=val_loader)
 
-    trained_model = trainer.train(use_sam=config['use_sam_optim'], verbose=True)
+    trained_model = trainer.train(use_sam_optim=config['use_sam_optim'], verbose=config['verbose'])
 
     # Save the best model
     if config['save_model']:
@@ -84,8 +86,8 @@ def test(args):
     device = torch.device("cuda:"+args.device if torch.cuda.is_available() else "cpu")
     with open(args.config, "r") as jsonfile:
         config = json.load(jsonfile)['test']
-    train_set = FaceDataset(root_dir=config['trainset_path'])
-    test_set = FaceDataset(root_dir=config['testset_path'])
+    train_set = FaceDataset(root_dir=config['trainset_path'], for_training=False)
+    test_set = FaceDataset(root_dir=config['testset_path'], for_training=False)
     test_loader = torch.torch.utils.data.DataLoader(test_set,
                                                     batch_size = config['batch_size'],
                                                     shuffle = False,

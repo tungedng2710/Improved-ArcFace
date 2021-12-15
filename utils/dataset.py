@@ -12,7 +12,7 @@ from PIL import Image
 
 class FaceDataset(Dataset):
     def __init__(self,
-                 save_label_dict: bool = False,
+                 for_training: bool = True,
                  root_dir: str = "/path/to/your/dataset/folder"):
         super(FaceDataset, self).__init__()
         self.transform = transforms.Compose(
@@ -24,7 +24,8 @@ class FaceDataset(Dataset):
             #                       std = [0.229, 0.224, 0.225]),
              ])
         self.root_dir = root_dir
-        self.list_data, self.id2name = self.preload()
+        if for_training:
+            self.list_data, self.id2name = self.preload()
         self.num_classes = len(os.listdir(root_dir))
     
     def convert_id2name(self, id):
@@ -37,7 +38,8 @@ class FaceDataset(Dataset):
         label_dict = {i: self.convert_id2name(i) for i in range(self.num_classes)}
         if not os.path.exists('./logs'):
             os.mkdir('./logs')
-        with open('./logs/label_dict.pkl', 'wb') as f:
+        path = './logs/'+str(self.num_classes)+'_label_dict.pkl'
+        with open(path, 'wb') as f:
             pickle.dump(label_dict, f)
 
     def preload(self):
@@ -71,15 +73,16 @@ class FaceDataset(Dataset):
     def __len__(self):
         return len(self.list_data)
 
-class Grooo_type_Dataloader:
+class FaceDataloader:
     def __init__(self, 
                  root_dir = None, 
                  val_size = 0.2, 
                  random_seed = 0,
                  batch_size_train = 64,
                  batch_size_val = 32,
-                 save_label_dict = False):
-        self.dataset = FaceDataset(root_dir=root_dir)
+                 save_label_dict = False,
+                 for_training = True):
+        self.dataset = FaceDataset(root_dir=root_dir, for_training=for_training)
         self.num_classes = self.dataset.num_classes
         self.val_size = int(val_size * self.dataset.__len__())
         self.train_size = self.dataset.__len__() - self.val_size

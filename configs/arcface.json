@@ -4,23 +4,30 @@
         "backbone": "mobilenet",
         "use_pretrained": true,
         "pretrained_model_path": "./weights/mobilenet.pth",
-        "root_dir": "./data/asian_masked",
+        "root_dir": "./data/datav2",
         "num_worker": 8,
         "freeze_model": true,
-        "batch_size_train": 32,
-        "batch_size_val": 32,
-        "n_epochs": 5,
+        "batch_size_train": 256,
+        "batch_size_val": 64,
+        "n_epochs": 30,
         "use_sam_optim": false,
-        "use_lamb_optim": true,
+        "sam_optim":
+        {
+            "momentum": 0.9,
+            "rho": 0.05,
+            "adaptive": false
+        },
+        "use_lamb_optim": false,
         "learning_rate": 5e-4,
         "prefix": "arcface",
-        "save_model": true
+        "save_model": true,
+        "verbose": 1
     },
     "test": {
-        "trainset_path": "./data/grooo112",
-        "testset_path": "./data/asian_masked",
-        "backbone": "irse50",
-        "pretrained_model_path": "./logs/arcface_irse50.pth",
+        "trainset_path": "./data/datav2",
+        "testset_path": "./data/datav2",
+        "backbone": "mobilenet",
+        "pretrained_model_path": "./logs/20211215/arcface_mobilenet.pth",
         "num_worker": 8,
         "batch_size": 32
     }
