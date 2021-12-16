@@ -26,8 +26,8 @@ For face alignment, run ```$python align_face.py --root_dir /path/to/dataset/fol
 * ```use_sam_optim```: use SAM Optimizer for training (set its value is ```true``` if you don't want to use Adam optimizer). You can find the original implementation at [link](https://github.com/davda54/sam) <br/>
 * ```use_lamb_optim```: use Lamb Optimizer for training (set its value is ```true``` if you don't want to use Adam optimizer). You can find the original implementation at [link](https://github.com/cybertronai/pytorch-lamb/blob/master/pytorch_lamb/lamb.py) <br/>
 * ```verbose```: 0: nothing will be shown; 1: shows results per epoch only; 2: shows train losses per iteration <br/>
-<br/>
-**Note**: Don't set the values of ```use_sam_optim``` and  ```use_sam_optim``` are ```true``` simultaneously. To make advanced configurations, pay your attention to the docstrings :) <br/>
+
+**Note** : Don't set the values of ```use_sam_optim``` and  ```use_sam_optim``` are ```true``` simultaneously. To make advanced configurations, pay your attention to the docstrings :) <br/>
 
 ### Test
 * ```trainset_path```: It is the same as ```root_dir``` in training phase <br/>
