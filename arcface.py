@@ -5,6 +5,7 @@ from backbones.MobileFaceNets import MobileFaceNet
 from backbones.GhostNet import GhostNet
 from backbones.AttentionNets import ResidualAttentionNet
 from backbones.ViT import ViT_face
+from backbones.MLPMixer import MLPMixer
 
 import os
 import torch
@@ -42,7 +43,7 @@ class ArcFaceModel(nn.Module):
                 embedding_size: int = 512,
                 type_of_freeze: str= "all"):
         """
-        backbone (str): ir50, irse50, irse101, irse152, mobilenet, resnet50, resnet101, ghostnet, attresnet, vit-face
+        backbone (str): ir50, irse50, irse101, irse152, mobilenet, resnet50, resnet101, ghostnet, attresnet, vit-face, mlpmixer
         input_size (list): input image size; example: [112, 112]  
         num_classes (int): number of face id
         use_pretrained (bool): use pretrained model
@@ -88,15 +89,23 @@ class ArcFaceModel(nn.Module):
         elif backbone_name == 'vit-face':
             self.backbone = ViT_face(loss_type = 'ArcFace',
                                     GPU_ID = 0,
-                                    num_class = 187,
+                                    num_class = num_classes,
                                     image_size=112,
                                     patch_size=8,
                                     dim=512,
-                                    depth=20,
+                                    depth=8,
                                     heads=8,
-                                    mlp_dim=2048,
+                                    mlp_dim=1024,
                                     dropout=0.1,
                                     emb_dropout=0.1)
+            self.classic_cnn = False
+        elif backbone_name == 'mlpmixer':
+            self.backbone = MLPMixer(image_size = 112,
+                                     channels = 3,
+                                     patch_size = 16,
+                                     dim = 512,
+                                     depth = 4,
+                                     num_classes = num_classes)
             self.classic_cnn = False
 
         if use_pretrained:
@@ -153,7 +162,6 @@ class ArcFaceModel(nn.Module):
     def freeze_resnet_backbone(self, 
                                 resnet_backbone = None,
                                 type_of_freeze = 'all'):
-        
         if type_of_freeze == 'all':
             freeze_module(resnet_backbone)
         elif type_of_freeze == 'body_only':

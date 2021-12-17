@@ -87,7 +87,7 @@ def train(args):
     if config['save_model']:
         trainer.save_trained_model(trained_model = trained_model, 
                                    prefix = config['prefix'], 
-                                   backbone = config['backbone'], 
+                                   backbone_name = config['backbone'], 
                                    num_classes = num_classes, 
                                    split_modules=False)
 

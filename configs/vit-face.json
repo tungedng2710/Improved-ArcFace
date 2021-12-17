@@ -1,14 +1,14 @@
 {
     "train": {
-        "loss": "CrossEntropy", 
+        "loss": "FocalLoss", 
         "backbone": "vit-face",
         "use_pretrained": true,
         "pretrained_backbone_path": "no/available",
-        "root_dir": "./data/datav2",
+        "root_dir": "./data/grooo112",
         "num_worker": 8,
         "freeze_model": true,
-        "batch_size_train": 32,
-        "batch_size_val": 32,
+        "batch_size_train": 64,
+        "batch_size_val": 64,
         "n_epochs": 50,
         "use_sam_optim": false,
         "sam_optim":
@@ -22,13 +22,13 @@
             "name": "StepLR",
             "step_size": 10,
             "gamma": 0.5,
-            "verbose": true
+            "verbose": false
         },
         "use_lamb_optim": false,
         "learning_rate": 5e-4,
         "prefix": "arcface",
         "save_model": true,
-        "verbose": 2
+        "verbose": 1
     },
     "test": {
         "trainset_path": "./data/datav2",

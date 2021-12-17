@@ -81,6 +81,8 @@ def get_loss(name: str = 'ArcFace'):
         loss_function = ArcFaceLoss()
     elif name == 'ElasticArcFace':
         loss_function = ElasticArcFaceLoss()
+    elif name == 'FocalLoss':
+        loss_function = FocalLoss()
     else:
         loss_function = nn.CrossEntropyLoss()
     return loss_function
