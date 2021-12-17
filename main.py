@@ -1,8 +1,8 @@
 from trainer import Trainer
 from utils.dataset import FaceDataset, FaceDataloader
 from arcface import ArcFaceModel
-from utils.losses import ArcFaceLoss, ElasticArcFaceLoss, get_loss
-from utils.optimizer import SAM, Lamb
+from utils.losses import get_loss
+from utils.optimizers import SAM, Lamb
 
 import datetime
 import os
@@ -37,11 +37,11 @@ def train(args):
     print("Device: ", device)
     print("Number of classes: {num_classes}".format(num_classes=num_classes))
 
-    # Get the path of pretrained model
+    # Get the path of pretrained backbone
     if config['use_pretrained']:
-        pretrained_model_path = config['pretrained_model_path']
+        pretrained_backbone_path = config['pretrained_backbone_path']
     else:
-        pretrained_model_path = None
+        pretrained_backbone_path = None
 
     # init model and train it
     loss_function = get_loss(config['loss'])
@@ -50,9 +50,10 @@ def train(args):
                         input_size=[112,112],
                         num_classes=num_classes,
                         use_pretrained=config['use_pretrained'],
-                        pretrained_model_path=pretrained_model_path,
+                        pretrained_backbone_path=pretrained_backbone_path,
                         freeze=config['freeze_model'],
                         type_of_freeze='body_only')
+    
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print('Number of trainable parameters: ', pytorch_total_params)
     n_epochs = config['n_epochs']
@@ -61,7 +62,9 @@ def train(args):
     if config['use_sam_optim']:
         optimizer = SAM(model.parameters(), 
                         lr=config['learning_rate'], 
-                        momentum=config['sam_optim']['momentum'])
+                        momentum=config['sam_optim']['momentum'],
+                        rho=config['sam_optim']['rho'],
+                        adaptive=config['sam_optim']['adaptive'])
     elif config['use_lamb_optim']:
         optimizer = Lamb(model.parameters(), lr=config['learning_rate'], weight_decay=1e-5)
     else:
@@ -80,9 +83,16 @@ def train(args):
 
     # Save the best model
     if config['save_model']:
-        trainer.save_trained_model(trained_model, config['prefix'], config['backbone'], num_classes)
+        trainer.save_trained_model(trained_model = trained_model, 
+                                   prefix = config['prefix'], 
+                                   backbone = config['backbone'], 
+                                   num_classes = num_classes, 
+                                   split_modules=True)
 
 def test(args):
+    '''
+    trained model must have fully connected layer
+    '''
     device = torch.device("cuda:"+args.device if torch.cuda.is_available() else "cpu")
     with open(args.config, "r") as jsonfile:
         config = json.load(jsonfile)['test']
@@ -124,4 +134,4 @@ if __name__ == '__main__':
     elif args.phase == 'test':
         test(args)
     else:
-        pass
+        print("phase "+args.phase+' is not available')

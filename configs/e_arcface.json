@@ -3,7 +3,7 @@
         "loss": "ElasticArcFace", 
         "backbone": "mobilenet",
         "use_pretrained": true,
-        "pretrained_model_path": "./weights/mobilenet.pth",
+        "pretrained_backbone_path": "./weights/mobilenet.pth",
         "root_dir": "./data/datav2",
         "num_worker": 8,
         "freeze_model": true,
