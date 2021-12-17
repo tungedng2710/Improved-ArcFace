@@ -5,6 +5,8 @@ from tqdm import tqdm
 import datetime
 import os
 
+from arcface import ArcFaceModel
+
 class Trainer:
     def __init__(self,
                  model = None,
@@ -99,13 +101,29 @@ class Trainer:
             correct = (torch.argmax(y_probs, dim = 1) == y_val).type(torch.FloatTensor)
         return loss, correct.mean()
 
-    def save_trained_model(self, trained_model, prefix, backbone_name, num_classes):
+    def save_trained_model(self, 
+                           trained_model: ArcFaceModel = None, 
+                           prefix: str = None,
+                           backbone_name: str = None, 
+                           num_classes: int = 1000,
+                           split_modules: bool = False):
         now = '{0:%Y%m%d}'.format(datetime.datetime.now())
         if not os.path.exists('./logs/'+now):
             os.mkdir('./logs/'+now)
-        path = 'logs/'+now+'/'+prefix+'_'+backbone_name+'_'+str(num_classes)+'.pth'
-        torch.save(trained_model.state_dict(), path)
-        print('Model is saved at '+path)
+        if split_modules:
+            path = 'logs/'+now+'/'+prefix+'_'+backbone_name+'_'+str(num_classes)+'ids_backbone.pth'
+            torch.save(trained_model.backbone.state_dict(), path)
+            print('Model is saved at '+path)
+            try: 
+                path = 'logs/'+now+'/'+prefix+'_'+backbone_name+'_'+str(num_classes)+'ids_fc.pth'
+                torch.save(trained_model.fc.state_dict(), path)
+                print('Model is saved at '+path)
+            except:
+                print("No fully connected layer found!")
+        else:
+            path = 'logs/'+now+'/'+prefix+'_'+backbone_name+'_'+str(num_classes)+'ids.pth'
+            torch.save(trained_model.state_dict(), path)
+            print('Model is saved at '+path)
 
     def normally_update(self, y_pred, y_true):
         loss = self.loss_function(y_pred, y_true)

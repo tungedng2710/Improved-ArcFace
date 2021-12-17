@@ -1,9 +1,10 @@
-from backbone.IRSE import IR_50, IR_SE_50, IR_101, IR_SE_101, IR_152, IR_SE_152
-from backbone.ResNet import ResNet_50, ResNet_101
-from backbone.InvertibleResNet import iresnet18, iresnet34, iresnet50
-from backbone.MobileFaceNets import MobileFaceNet
-from backbone.GhostNet import GhostNet
-from backbone.AttentionNets import ResidualAttentionNet
+from backbones.IRSE import IR_50, IR_SE_50, IR_101, IR_SE_101, IR_152, IR_SE_152
+from backbones.ResNet import ResNet_50, ResNet_101
+from backbones.InvertibleResNet import iresnet18, iresnet34, iresnet50
+from backbones.MobileFaceNets import MobileFaceNet
+from backbones.GhostNet import GhostNet
+from backbones.AttentionNets import ResidualAttentionNet
+from backbones.ViT import ViT_face
 
 import os
 import torch
@@ -36,7 +37,7 @@ class ArcFaceModel(nn.Module):
                 num_classes: int = 1000, 
                 input_size: list = [112, 112],
                 use_pretrained: bool = False,
-                pretrained_model_path: str = None,
+                pretrained_backbone_path: str = None,
                 freeze: bool = True,
                 embedding_size: int = 512,
                 type_of_freeze: str= "all"):
@@ -50,6 +51,7 @@ class ArcFaceModel(nn.Module):
         """
         super(ArcFaceModel, self).__init__()
         print("Backbone: ", backbone_name)
+        self.classic_cnn = True
         # IRSE 
         if backbone_name == 'ir50': 
             self.backbone = IR_50(input_size)
@@ -83,10 +85,23 @@ class ArcFaceModel(nn.Module):
                                                  feat_dim=embedding_size,
                                                  out_h=7,
                                                  out_w=7)
+        elif backbone_name == 'vit-face':
+            self.backbone = ViT_face(loss_type = 'ArcFace',
+                                    GPU_ID = 0,
+                                    num_class = 187,
+                                    image_size=112,
+                                    patch_size=8,
+                                    dim=512,
+                                    depth=20,
+                                    heads=8,
+                                    mlp_dim=2048,
+                                    dropout=0.1,
+                                    emb_dropout=0.1)
+            self.classic_cnn = False
 
         if use_pretrained:
             try:
-                self.backbone.load_state_dict(torch.load(pretrained_model_path))
+                self.backbone.load_state_dict(torch.load(pretrained_backbone_path))
             except:
                 print('No suitable pretrained model found, the arcface model will be trained from scratch!')
                 freeze = False
@@ -153,5 +168,8 @@ class ArcFaceModel(nn.Module):
 
     def forward(self, x):
         x = self.backbone(x)
-        return self.fc(x)
+        if self.classic_cnn:
+            return self.fc(x)
+        else:
+            return x
 
