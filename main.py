@@ -79,7 +79,9 @@ def train(args):
                       train_loader=train_loader,
                       val_loader=val_loader)
 
-    trained_model = trainer.train(use_sam_optim=config['use_sam_optim'], verbose=config['verbose'])
+    trained_model = trainer.train(use_sam_optim=config['use_sam_optim'], 
+                                  verbose=config['verbose'],
+                                  scheduler_config=config['scheduler'])
 
     # Save the best model
     if config['save_model']:
@@ -87,7 +89,7 @@ def train(args):
                                    prefix = config['prefix'], 
                                    backbone = config['backbone'], 
                                    num_classes = num_classes, 
-                                   split_modules=True)
+                                   split_modules=False)
 
 def test(args):
     '''

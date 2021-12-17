@@ -17,6 +17,13 @@
             "rho": 0.05,
             "adaptive": false
         },
+        "scheduler":
+        {
+            "name": "StepLR",
+            "step_size": 10,
+            "gamma": 0.5,
+            "verbose": true
+        },
         "use_lamb_optim": false,
         "learning_rate": 5e-4,
         "prefix": "arcface",

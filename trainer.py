@@ -4,6 +4,7 @@ from torch.optim.lr_scheduler import LambdaLR, StepLR
 from tqdm import tqdm
 import datetime
 import os
+from timm.scheduler import create_scheduler
 
 from arcface import ArcFaceModel
 
@@ -31,13 +32,18 @@ class Trainer:
         self.train_loader = train_loader
         self.val_loader = val_loader
         
-    def schedule_lr(self, optimizer):
-        scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
-        return scheduler        
+    def get_scheduler(self, scheduler_config):
+        lr_scheduler = StepLR(self.optimizer, 
+                            step_size=scheduler_config['step_size'], 
+                            gamma=scheduler_config['gamma'],
+                            verbose=scheduler_config['verbose'])
+        return lr_scheduler
+
 
     def train(self, 
-             verbose = 0, 
-             use_sam_optim = False):
+              verbose = 0, 
+              use_sam_optim = False,
+              scheduler_config = None):
         '''
         verbose: 
             0: nothing will be shown
@@ -48,8 +54,11 @@ class Trainer:
         best_model = self.model
         best_acc = -1
         train_loss = 0.0
-        # scheduler = self.schedule_lr(self.optimizer)
+        if scheduler_config is not None:
+            lr_scheduler = self.get_scheduler(scheduler_config)
         for epoch in range(self.n_epochs):
+            if scheduler_config is not None:
+                lr_scheduler.step(epoch)
             self.model.train()
             print("Epoch: ", epoch)
             print("Training...")

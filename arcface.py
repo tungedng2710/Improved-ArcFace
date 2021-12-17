@@ -42,7 +42,7 @@ class ArcFaceModel(nn.Module):
                 embedding_size: int = 512,
                 type_of_freeze: str= "all"):
         """
-        backbone (str): ir50, irse50, irse101, irse152, mobilenet, resnet50, resnet101
+        backbone (str): ir50, irse50, irse101, irse152, mobilenet, resnet50, resnet101, ghostnet, attresnet, vit-face
         input_size (list): input image size; example: [112, 112]  
         num_classes (int): number of face id
         use_pretrained (bool): use pretrained model
