@@ -52,7 +52,7 @@ class ArcFaceModel(nn.Module):
         """
         super(ArcFaceModel, self).__init__()
         print("Backbone: ", backbone_name)
-        self.classic_cnn = True
+        self.use_linear = True
         # IRSE 
         if backbone_name == 'ir50': 
             self.backbone = IR_50(input_size)
@@ -87,18 +87,14 @@ class ArcFaceModel(nn.Module):
                                                  out_h=7,
                                                  out_w=7)
         elif backbone_name == 'vit-face':
-            self.backbone = ViT_face(loss_type = 'ArcFace',
-                                    GPU_ID = 0,
-                                    num_class = num_classes,
-                                    image_size=112,
-                                    patch_size=8,
-                                    dim=512,
-                                    depth=8,
-                                    heads=8,
-                                    mlp_dim=1024,
-                                    dropout=0.1,
-                                    emb_dropout=0.1)
-            self.classic_cnn = False
+            self.backbone = ViT_face(image_size=112,
+                                     patch_size=16,
+                                     dim=512,
+                                     depth=4,
+                                     heads=8,
+                                     mlp_dim=1024,
+                                     dropout=0,
+                                     emb_dropout=0)
         elif backbone_name == 'mlpmixer':
             self.backbone = MLPMixer(image_size = 112,
                                      channels = 3,
@@ -106,8 +102,6 @@ class ArcFaceModel(nn.Module):
                                      dim = 512,
                                      depth = 4,
                                      num_classes = num_classes)
-            self.classic_cnn = False
-
         if use_pretrained:
             try:
                 self.backbone.load_state_dict(torch.load(pretrained_backbone_path))
@@ -175,9 +169,9 @@ class ArcFaceModel(nn.Module):
         return resnet_backbone
 
     def forward(self, x):
-        x = self.backbone(x)
-        if self.classic_cnn:
-            return self.fc(x)
+        emb = self.backbone(x)
+        if self.use_linear:
+            return self.fc(emb)
         else:
-            return x
+            return emb
 

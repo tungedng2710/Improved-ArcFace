@@ -1,7 +1,7 @@
 {
     "train": {
         "loss": "ArcFace", 
-        "backbone": "iresnet50",
+        "backbone": "vit-face",
         "use_pretrained": true,
         "pretrained_backbone_path": "./weights/irse50.pth",
         "root_dir": "./data/grooo112",
@@ -21,7 +21,7 @@
         {
             "name": "StepLR",
             "step_size": 10,
-            "gamma": 0.5,
+            "gamma": 0.7,
             "verbose": false
         },
         "use_lamb_optim": false,
