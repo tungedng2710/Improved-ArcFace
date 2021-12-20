@@ -74,13 +74,9 @@ class Trainer:
                 y_train=y_train.to(self.device)
                 y_pred = self.model(images)
                 if use_sam_optim:
-                    loss = self.sam_update(images, y_pred, y_train)
-                    if scheduler_config is not None:
-                        lr_scheduler.step()                   
+                    loss = self.sam_update(images, y_pred, y_train)                   
                 else:
                     loss = self.normally_update(y_pred, y_train)
-                    if scheduler_config is not None:
-                        lr_scheduler.step() 
                 if verbose > 1:
                     print("iter ", idx, "Train loss: ", loss.item())
                 train_loss += loss.item()
@@ -116,6 +112,8 @@ class Trainer:
                                                     val_loss=round(val_loss, 4),
                                                     cur_acc=round(val_accuracy.item(), 4),
                                                     best_acc=round(best_acc.item(), 4)))
+            if scheduler_config is not None:
+                lr_scheduler.step()
         self.writer.close()
         return best_model
 
