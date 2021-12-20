@@ -1,7 +1,7 @@
 {
     "train": {
         "loss": "ArcFace", 
-        "backbone": "vit-face",
+        "backbone": "mobilenet",
         "use_pretrained": false,
         "pretrained_backbone_path": "./weights/insight_irse50_backbone.pth",
         "root_dir": "./data/datav3",
@@ -11,6 +11,7 @@
         "batch_size_val": 64,
         "n_epochs": 50,
         "use_sam_optim": false,
+        "use_lr_scheduler": false,
         "sam_optim":
         {
             "momentum": 0.9,
@@ -19,13 +20,21 @@
         },
         "scheduler":
         {
-            "name": "StepLR",                                                                                                                                                                                 
-            "step_size": 8,
-            "gamma": 0.7,
-            "verbose": false
+            "name": "OneCycleLR", 
+            "StepLR":
+            {                                                                                                                                                                                
+                "step_size": 10,
+                "gamma": 0.5,
+                "verbose": false
+            },
+            "OneCycleLR":
+            {
+                "max_lr": 1e-3,
+                "epochs": 5
+            }
         },
         "use_lamb_optim": false,
-        "learning_rate": 1e-4,
+        "learning_rate": 5e-4,
         "prefix": "arcface",
         "save_model": false,
         "verbose": 1

@@ -69,7 +69,11 @@ def train(args):
         optimizer = Lamb(model.parameters(), lr=config['learning_rate'], weight_decay=1e-5)
     else:
         optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'], weight_decay=1e-5)
-    
+    # use learning rate scheduler
+    if config['use_lr_scheduler']:
+        scheduler_config = config['scheduler']
+    else:
+        scheduler_config = None
     # Initialize Trainer and train model
     trainer = Trainer(model=model,
                       n_epochs=n_epochs,
@@ -78,11 +82,9 @@ def train(args):
                       device=device,
                       train_loader=train_loader,
                       val_loader=val_loader)
-
     trained_model = trainer.train(use_sam_optim=config['use_sam_optim'], 
                                   verbose=config['verbose'],
-                                  scheduler_config=None)
-
+                                  scheduler_config=scheduler_config)
     # Save the best model
     if config['save_model']:
         trainer.save_trained_model(trained_model = trained_model, 

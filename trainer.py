@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.optim.lr_scheduler import LambdaLR, StepLR
+from torch.optim.lr_scheduler import StepLR, OneCycleLR
 from tqdm import tqdm
 import datetime
 import os
@@ -42,10 +42,18 @@ class Trainer:
         self.writer = create_writer()
         
     def get_scheduler(self, scheduler_config):
-        lr_scheduler = StepLR(self.optimizer, 
-                            step_size=scheduler_config['step_size'], 
-                            gamma=scheduler_config['gamma'],
-                            verbose=scheduler_config['verbose'])
+        if scheduler_config['name'] == 'StepLR':
+            lr_scheduler = StepLR(self.optimizer, 
+                                step_size=scheduler_config['StepLR']['step_size'], 
+                                gamma=scheduler_config['StepLR']['gamma'],
+                                verbose=scheduler_config['StepLR']['verbose'])
+        elif scheduler_config['name'] == 'OneCycleLR':
+            lr_scheduler = OneCycleLR(self.optimizer, 
+                                      max_lr=scheduler_config['OneCycleLR']['max_lr'], 
+                                      steps_per_epoch=len(self.train_loader), 
+                                      epochs=scheduler_config['OneCycleLR']['epochs'])
+        else:
+            raise Exception("Unavailable scheduler")
         return lr_scheduler
 
 
