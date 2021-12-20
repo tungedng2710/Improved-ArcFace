@@ -5,21 +5,6 @@ import torch
 from torch import nn
 from functools import partial
 from einops.layers.torch import Rearrange, Reduce
-import torch.nn.functional as F
-
-class NormalizedLinear(nn.Module):
-    """
-    Linear layer for classification 
-    """
-    def __init__(self, in_features, out_features):
-        super(NormalizedLinear, self).__init__()
-        self.W = nn.Parameter(torch.FloatTensor(out_features, in_features))
-        nn.init.xavier_uniform_(self.W)
-
-    def forward(self, input):
-        x = F.normalize(input)
-        W = F.normalize(self.W)
-        return F.linear(x, W)
 
 class PreNormResidual(nn.Module):
     def __init__(self, dim, fn):
@@ -39,8 +24,8 @@ def FeedForward(dim, expansion_factor = 4, dropout = 0., dense = nn.Linear):
         nn.Dropout(dropout)
     )
 
-def MLPMixer(*, image_size, channels, patch_size, dim, depth, num_classes, expansion_factor = 4, dropout = 0.):
-    assert (image_size % patch_size) == 0, 'image must be divisible by patch size'
+def MLPMixer(*, image_size, channels, patch_size, dim, depth, expansion_factor = 4, dropout = 0.):
+    assert (image_size % patch_size) == 0
     num_patches = (image_size // patch_size) ** 2
     chan_first, chan_last = partial(nn.Conv1d, kernel_size = 1), nn.Linear
 
@@ -53,5 +38,4 @@ def MLPMixer(*, image_size, channels, patch_size, dim, depth, num_classes, expan
         ) for _ in range(depth)],
         nn.LayerNorm(dim),
         Reduce('b n c -> b c', 'mean'),
-        # NormalizedLinear(dim, num_classes)
     )

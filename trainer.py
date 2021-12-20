@@ -5,8 +5,16 @@ from tqdm import tqdm
 import datetime
 import os
 from timm.scheduler import create_scheduler
-
+from torch.utils.tensorboard import SummaryWriter
 from arcface import ArcFaceModel
+
+def create_writer():
+    now = '{0:%Y%m%d}'.format(datetime.datetime.now())
+    if not os.path.exists('./logs/'+now):
+        os.mkdir('./logs/'+now)
+    path = './logs/'+now+'/'
+    writer = SummaryWriter(path)
+    return writer
 
 class Trainer:
     def __init__(self,
@@ -31,6 +39,7 @@ class Trainer:
         self.loss_function = loss_function
         self.train_loader = train_loader
         self.val_loader = val_loader
+        self.writer = create_writer()
         
     def get_scheduler(self, scheduler_config):
         lr_scheduler = StepLR(self.optimizer, 
@@ -57,24 +66,29 @@ class Trainer:
         if scheduler_config is not None:
             lr_scheduler = self.get_scheduler(scheduler_config)
         for epoch in range(self.n_epochs):
-            if scheduler_config is not None:
-                lr_scheduler.step(epoch)
             self.model.train()
             print("Epoch: ", epoch)
             print("Training...")
-            for idx, (image, y_train) in enumerate(self.train_loader):
-                image = image.to(self.device)
+            for idx, (images, y_train) in enumerate(self.train_loader):
+                images = images.to(self.device)
                 y_train=y_train.to(self.device)
-                y_pred = self.model(image)
-
+                y_pred = self.model(images)
                 if use_sam_optim:
-                    loss = self.sam_update(image, y_pred, y_train)                   
+                    loss = self.sam_update(images, y_pred, y_train)
+                    if scheduler_config is not None:
+                        lr_scheduler.step()                   
                 else:
                     loss = self.normally_update(y_pred, y_train)
+                    if scheduler_config is not None:
+                        lr_scheduler.step() 
                 if verbose > 1:
                     print("iter ", idx, "Train loss: ", loss.item())
                 train_loss += loss.item()
-
+                if idx % 10 == 9:    # every 10 mini-batches...
+                    # ...log the training loss
+                    self.writer.add_scalar('training loss',
+                                            train_loss / 10,
+                                            epoch * len(self.train_loader) + idx)
             acc = []
             val_loss = 0.0
             print("Validating...")
@@ -82,6 +96,11 @@ class Trainer:
                 loss, correct = self.eval(X_val, y_val)
                 val_loss += loss.item()
                 acc.append(correct)
+                if idx % 10 == 9:    # every 10 mini-batches...
+                    # ...log the validating loss
+                    self.writer.add_scalar('validating loss',
+                                            val_loss / 10,
+                                            epoch * len(self.val_loader) + idx)
             val_accuracy = sum(acc)/len(acc)
             if val_accuracy>=best_acc:
                 best_model = self.model
@@ -97,6 +116,7 @@ class Trainer:
                                                     val_loss=round(val_loss, 4),
                                                     cur_acc=round(val_accuracy.item(), 4),
                                                     best_acc=round(best_acc.item(), 4)))
+        self.writer.close()
         return best_model
 
     def eval(self, X_val, y_val):
@@ -115,22 +135,29 @@ class Trainer:
                            prefix: str = None,
                            backbone_name: str = None, 
                            num_classes: int = 1000,
-                           split_modules: bool = False):
+                           split_modules: bool = False,
+                           extension: str = 'pth'):
         now = '{0:%Y%m%d}'.format(datetime.datetime.now())
-        if not os.path.exists('./logs/'+now):
-            os.mkdir('./logs/'+now)
+        if not os.path.exists('./weights/'+now):
+            os.mkdir('./weights/'+now)
         if split_modules:
-            path = 'logs/'+now+'/'+prefix+'_'+backbone_name+'_'+str(num_classes)+'ids_backbone.pth'
+            path = 'weights/'+now+'/'+prefix+'_'+backbone_name+'_'+str(num_classes)+'ids_backbone.'+extension
             torch.save(trained_model.backbone.state_dict(), path)
             print('Model is saved at '+path)
             try: 
-                path = 'logs/'+now+'/'+prefix+'_'+backbone_name+'_'+str(num_classes)+'ids_fc.pth'
+                path = 'weights/'+now+'/'+prefix+'_'+backbone_name+'_'+str(num_classes)+'ids_fc.'+extension
                 torch.save(trained_model.fc.state_dict(), path)
                 print('Model is saved at '+path)
             except:
                 print("No fully connected layer found!")
+                self.save_trained_model(trained_model=trained_model,
+                                        prefix=prefix,
+                                        backbone_name=backbone_name,
+                                        num_classes=num_classes,
+                                        split_modules=False,
+                                        extension=extension)
         else:
-            path = 'logs/'+now+'/'+prefix+'_'+backbone_name+'_'+str(num_classes)+'ids.pth'
+            path = 'weights/'+now+'/'+prefix+'_'+backbone_name+'_'+str(num_classes)+'ids.'+extension
             torch.save(trained_model.state_dict(), path)
             print('Model is saved at '+path)
 
@@ -141,7 +168,7 @@ class Trainer:
         self.optimizer.step()
         return loss
 
-    def sam_update(self, image, y_pred, y_true):
+    def sam_update(self, image, y_pred, y_true): 
         loss = self.loss_function(y_pred, y_true)
         loss.backward()
         self.optimizer.first_step(zero_grad=True)

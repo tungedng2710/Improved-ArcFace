@@ -43,12 +43,12 @@ class ArcFaceModel(nn.Module):
                 embedding_size: int = 512,
                 type_of_freeze: str= "all"):
         """
-        backbone (str): ir50, irse50, irse101, irse152, mobilenet, resnet50, resnet101, ghostnet, attresnet, vit-face, mlpmixer
+        backbone (str): ir50, irse50, irse101, irse152, mobilenet, resnet50, resnet101, ghostnet, attresnet, vit-face, mlp-mixer
         input_size (list): input image size; example: [112, 112]  
         num_classes (int): number of face id
         use_pretrained (bool): use pretrained model
         freeze (bool): freeze feature extractor
-        type_of_freeze (str): all (embedding + backbone), emb_only, body_only
+        type_of_freeze (str): all (embedding + feature extraction), body_only (only feature extraction)
         """
         super(ArcFaceModel, self).__init__()
         print("Backbone: ", backbone_name)
@@ -88,20 +88,20 @@ class ArcFaceModel(nn.Module):
                                                  out_w=7)
         elif backbone_name == 'vit-face':
             self.backbone = ViT_face(image_size=112,
-                                     patch_size=16,
+                                     patch_size=8,
                                      dim=512,
-                                     depth=4,
+                                     depth=10,
                                      heads=8,
                                      mlp_dim=1024,
-                                     dropout=0,
-                                     emb_dropout=0)
-        elif backbone_name == 'mlpmixer':
+                                     dropout=0.1,
+                                     emb_dropout=0.1)
+        elif backbone_name == 'mlp-mixer':
             self.backbone = MLPMixer(image_size = 112,
                                      channels = 3,
-                                     patch_size = 16,
+                                     patch_size = 8,
                                      dim = 512,
-                                     depth = 4,
-                                     num_classes = num_classes)
+                                     dropout=0.1,
+                                     depth = 2)
         if use_pretrained:
             try:
                 self.backbone.load_state_dict(torch.load(pretrained_backbone_path))
@@ -126,24 +126,17 @@ class ArcFaceModel(nn.Module):
     def freeze_irse_backbone(self,
                              irse_backbone = None, 
                              type_of_freeze = "all"):
-        if type_of_freeze == 'all':
-            freeze_module(irse_backbone)
-        elif type_of_freeze == 'body_only':
+        if type_of_freeze == 'body_only':
             freeze_module(irse_backbone.input_layer) 
             freeze_module(irse_backbone.body)
-        elif type_of_freeze == 'emb_only':
-            freeze_module(irse_backbone.input_layer) 
-            freeze_module(irse_backbone.output_layer)
         else:
-            pass
+            freeze_module(irse_backbone)
         return irse_backbone
 
     def freeze_mobilenet_backbone(self, 
                                   mobile_backbone = None,
                                   type_of_freeze = 'all'):
-        if type_of_freeze == 'all':
-            freeze_module(mobile_backbone)
-        elif type_of_freeze == 'body_only':
+        if type_of_freeze == 'body_only':
             i = 0
             for child in mobile_backbone.children():
                 if i < 11:
@@ -156,9 +149,7 @@ class ArcFaceModel(nn.Module):
     def freeze_resnet_backbone(self, 
                                 resnet_backbone = None,
                                 type_of_freeze = 'all'):
-        if type_of_freeze == 'all':
-            freeze_module(resnet_backbone)
-        elif type_of_freeze == 'body_only':
+        if type_of_freeze == 'body_only':
             i = 0
             for child in resnet_backbone.children():
                 if i < 10:

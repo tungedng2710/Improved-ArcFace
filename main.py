@@ -81,7 +81,7 @@ def train(args):
 
     trained_model = trainer.train(use_sam_optim=config['use_sam_optim'], 
                                   verbose=config['verbose'],
-                                  scheduler_config=config['scheduler'])
+                                  scheduler_config=None)
 
     # Save the best model
     if config['save_model']:
@@ -123,7 +123,7 @@ def test(args):
         with torch.no_grad():
             logits = model(images)
             y_probs = torch.softmax(logits, dim = 1) 
-            correct = (torch.argmax(y_probs, dim = 1 ) == labels).type(torch.FloatTensor)
+            correct = (torch.argmax(y_probs, dim = 1) == labels).type(torch.FloatTensor)
         batch_accuracy = correct.mean()
         acc.append(batch_accuracy)
     test_accuracy = sum(acc)/len(acc)

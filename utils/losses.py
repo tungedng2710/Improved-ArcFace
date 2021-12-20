@@ -23,18 +23,20 @@ class FocalLoss(nn.Module):
         return loss.mean()
 
 class ArcFaceLoss(nn.Module):
-    def __init__(self, s=30.0, m=0.50, is_cuda=True):
+    def __init__(self, s=30.0, m=0.50, is_cuda=True, base_loss = 'CrossEntropyLoss'):
         super(ArcFaceLoss, self).__init__()
         self.s = s
         self.m = m
-        self.criterion = FocalLoss()
-        # self.criterion = nn.CrossEntropyLoss()
+        if base_loss == 'FocalLoss':
+            self.criterion = FocalLoss()
+        else:
+            self.criterion = nn.CrossEntropyLoss()
         if is_cuda:
             self.criterion = self.criterion.cuda()
 
     def forward(self, input, label):
         theta = torch.acos(torch.clamp(input, -1.0 + 1e-7, 1.0 - 1e-7))
-        target_logits = torch.cos(theta + self.m)
+        target_logits = torch.cos(theta + self.m) 
         one_hot = torch.zeros_like(input)
         one_hot.scatter_(1, label.view(-1, 1).long(), 1)
         output = input * (1 - one_hot) + target_logits * one_hot
@@ -78,7 +80,7 @@ class ElasticArcFaceLoss(nn.Module):
 
 def get_loss(name: str = 'ArcFace'):
     if name == 'ArcFace':
-        loss_function = ArcFaceLoss()
+        loss_function = ArcFaceLoss(base_loss='FocalLoss')
     elif name == 'ElasticArcFace':
         loss_function = ElasticArcFaceLoss()
     elif name == 'FocalLoss':
