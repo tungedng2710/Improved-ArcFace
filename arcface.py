@@ -90,7 +90,7 @@ class ArcFaceModel(nn.Module):
             self.backbone = ViT_face(image_size=112,
                                      patch_size=8,
                                      dim=512,
-                                     depth=10,
+                                     depth=5,
                                      heads=8,
                                      mlp_dim=1024,
                                      dropout=0.1,
@@ -101,7 +101,7 @@ class ArcFaceModel(nn.Module):
                                      patch_size = 8,
                                      dim = 512,
                                      dropout=0.1,
-                                     depth = 2)
+                                     depth = 5)
         if use_pretrained:
             try:
                 self.backbone.load_state_dict(torch.load(pretrained_backbone_path))
