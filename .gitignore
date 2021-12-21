@@ -134,3 +134,5 @@ logs/*
 weights/*.pt*
 *ipynb*
 verification.py
+backbones/ViT_orig.py
+backbones/configs.json

@@ -48,9 +48,9 @@ class FaceDataset(Dataset):
         label_index = 0 #convert string label name to int index
         for folder_name in os.listdir(self.root_dir):
             for image_name in os.listdir(self.root_dir+"/"+folder_name):
-                image = Image.open(self.root_dir+"/"+folder_name+"/"+image_name)
+                path = self.root_dir+"/"+folder_name+"/"+image_name
                 sample = {
-                    "image": image,
+                    "image": path,
                     "label": label_index,
                 }
                 list_data.append(sample)
@@ -63,9 +63,8 @@ class FaceDataset(Dataset):
         if index >= self.__len__():
             index = random.randint(0, self.__len__()-1)
             print("Index is bigger than dataset length, random new index: ", index)
-            
         sample = self.list_data[index]
-        image = sample["image"]
+        image = Image.open(sample["image"])
         image = self.transform(image)
         label = sample["label"]
         return image, label

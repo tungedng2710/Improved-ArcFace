@@ -2,20 +2,36 @@
     "train": {
         "loss": "ArcFace", 
         "backbone": "mobilenet",
-        "use_pretrained": true,
-        "pretrained_backbone_path": "./weights/mobilenet.pth",
-        "root_dir": "./data/grooo112",
+        "use_pretrained": false,
+        "pretrained_backbone_path": "./weights/insight_irse50_backbone.pth",
+        "root_dir": "./data/datav3",
         "num_worker": 8,
         "freeze_model": true,
-        "batch_size_train": 256,
+        "batch_size_train": 64,
         "batch_size_val": 64,
-        "n_epochs": 30,
+        "n_epochs": 50,
         "use_sam_optim": false,
+        "use_lr_scheduler": false,
         "sam_optim":
         {
             "momentum": 0.9,
             "rho": 0.05,
             "adaptive": false
+        },
+        "scheduler":
+        {
+            "name": "OneCycleLR", 
+            "StepLR":
+            {                                                                                                                                                                                
+                "step_size": 10,
+                "gamma": 0.5,
+                "verbose": false
+            },
+            "OneCycleLR":
+            {
+                "max_lr": 1e-3,
+                "epochs": 5
+            }
         },
         "use_lamb_optim": false,
         "learning_rate": 5e-4,
