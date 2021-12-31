@@ -131,7 +131,7 @@ dmypy.json
 # Weights, logs and test file
 data/*
 logs/*
-weights/*.pt*
+weights/*
 *ipynb*
 verification.py
 backbones/ViT_orig.py
