@@ -91,7 +91,7 @@ def train(args):
                                    prefix = config['prefix'], 
                                    backbone_name = config['backbone'], 
                                    num_classes = num_classes, 
-                                   split_modules=False)
+                                   split_modules=True)
 
 def test(args):
     '''
@@ -100,8 +100,8 @@ def test(args):
     device = torch.device("cuda:"+args.device if torch.cuda.is_available() else "cpu")
     with open(args.config, "r") as jsonfile:
         config = json.load(jsonfile)['test']
-    train_set = FaceDataset(root_dir=config['trainset_path'], for_training=False)
-    test_set = FaceDataset(root_dir=config['testset_path'], for_training=False)
+    train_set = FaceDataset(root_dir=config['trainset_path'])
+    test_set = FaceDataset(root_dir=config['testset_path'])
     test_loader = torch.torch.utils.data.DataLoader(test_set,
                                                     batch_size = config['batch_size'],
                                                     shuffle = False,
