@@ -91,7 +91,7 @@ class ArcFaceModel(nn.Module):
                                      patch_size=8,
                                      dim=512,
                                      depth=5,
-                                     heads=8,
+                                     heads=10,
                                      mlp_dim=1024,
                                      dropout=0.1,
                                      emb_dropout=0.1)

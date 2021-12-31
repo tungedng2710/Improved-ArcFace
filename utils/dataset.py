@@ -72,6 +72,16 @@ class FaceDataset(Dataset):
     def __len__(self):
         return len(self.list_data)
 
+    def get_items_by_class(self, label_dict_path, label_index):
+        with open(label_dict_path, 'rb') as f:
+            label_dict = pickle.load(f)
+        class_name = label_dict[label_index]
+        list_of_samples =[] # The list of paths to sample image
+        for image_name in os.listdir(self.root_dir+"/"+class_name):
+            path = self.root_dir+"/"+class_name+"/"+image_name
+            list_of_samples.append(path)
+        return class_name, list_of_samples
+
 class FaceDataloader:
     def __init__(self, 
                  root_dir = None, 
@@ -79,9 +89,8 @@ class FaceDataloader:
                  random_seed = 0,
                  batch_size_train = 64,
                  batch_size_val = 32,
-                 save_label_dict = False,
-                 for_training = True):
-        self.dataset = FaceDataset(root_dir=root_dir, for_training=for_training)
+                 save_label_dict = False):
+        self.dataset = FaceDataset(root_dir=root_dir)
         self.num_classes = self.dataset.num_classes
         self.val_size = int(val_size * self.dataset.__len__())
         self.train_size = self.dataset.__len__() - self.val_size
@@ -94,13 +103,13 @@ class FaceDataloader:
             self.dataset.save_label_dict()
 
     def get_dataloaders(self, num_worker = 8):
-        train_loader = torch.utils.data.DataLoader(self.train_set,
-                                                    batch_size = self.batch_size_train,
-                                                    shuffle = True,
-                                                    num_workers = num_worker,
-                                                    drop_last=True)
-        val_loader = torch.utils.data.DataLoader(self.val_set,
-                                                    batch_size = self.batch_size_val,
-                                                    shuffle = False,
-                                                    num_workers = num_worker)
+        train_loader = DataLoader(self.train_set,
+                                batch_size = self.batch_size_train,
+                                shuffle = True,
+                                num_workers = num_worker,
+                                drop_last=True)
+        val_loader = DataLoader(self.val_set,
+                                batch_size = self.batch_size_val,
+                                shuffle = False,
+                                num_workers = num_worker)
         return train_loader, val_loader
