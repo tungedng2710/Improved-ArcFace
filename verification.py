@@ -123,13 +123,13 @@ if __name__ == '__main__':
     temp_acc = []
     for idx, (images, labels) in tqdm(enumerate(test_loader)):
         faces = images
-        # crop = transforms.Compose(
-        #     [
-        #     transforms.CenterCrop((105, 105)),
-        #     transforms.Resize((112, 112))
-        #     ])
-        # faces = crop(faces)
-        
+        shape = faces.shape
+
+        # # Filling hair
+        # thickness = 10
+        # mask_shape = (shape[0], shape[1], thickness, shape[3])
+        # faces[:, :, 0:thickness, :] = torch.ones(mask_shape)
+
         ids, _ = verification.verify(faces=faces, 
                               embeddings = faces,
                               threshold = 0.5,
