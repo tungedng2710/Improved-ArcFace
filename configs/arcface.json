@@ -48,9 +48,12 @@
         "batch_size": 32
     },
     "verification": {
-        "trainset_path": "./data/datav2",
-        "label_dict_path": "./logs/187_label_dict.pkl",
+        "trainset_path": "./data/asian_masked",
+        "testset_path": "./data/asian_masked",
+        "base_embedding": "logs/asian_masked_base_embedding.pth",
+        "base_labels": "logs/asian_masked_base_label.pth",
+        "label_dict_path": "./logs/asian_masked_974_label_dict.pkl",
         "backbone": "mobilenet",
-        "pretrained_backbone_path": "./weights/20211221/arcface_mobilenet_187ids_backbone.pth"
+        "pretrained_backbone_path": "./weights/arcface_mobilenet_187ids_backbone.pth"
     }
 }
