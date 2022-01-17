@@ -75,7 +75,8 @@ class Trainer:
             lr_scheduler = self.get_scheduler(scheduler_config)
         for epoch in range(self.n_epochs):
             self.model.train()
-            print("Epoch: ", epoch)
+            print("--------------------------------------------------------------------------")
+            print("Epoch: ", epoch+1)
             print("Training...")
             for idx, (images, y_train) in enumerate(self.train_loader):
                 images = images.to(self.device)

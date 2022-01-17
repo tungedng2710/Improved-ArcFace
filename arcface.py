@@ -90,9 +90,9 @@ class ArcFaceModel(nn.Module):
             self.backbone = ViT_face(image_size=112,
                                      patch_size=8,
                                      dim=512,
-                                     depth=5,
-                                     heads=10,
-                                     mlp_dim=1024,
+                                     depth=10,
+                                     heads=8,
+                                     mlp_dim=2048,
                                      dropout=0.1,
                                      emb_dropout=0.1)
         elif backbone_name == 'mlp-mixer':
@@ -101,7 +101,7 @@ class ArcFaceModel(nn.Module):
                                      patch_size = 8,
                                      dim = 512,
                                      dropout=0.1,
-                                     depth = 5)
+                                     depth = 8)
         if use_pretrained:
             try:
                 self.backbone.load_state_dict(torch.load(pretrained_backbone_path))

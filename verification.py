@@ -125,10 +125,11 @@ if __name__ == '__main__':
         faces = images
         shape = faces.shape
 
-        # # Filling hair
-        # thickness = 10
-        # mask_shape = (shape[0], shape[1], thickness, shape[3])
-        # faces[:, :, 0:thickness, :] = torch.ones(mask_shape)
+        # Filling hair
+        if config["fill_hair"]:
+            thickness = config["hair_filling_thickness"]
+            mask_shape = (shape[0], shape[1], thickness, shape[3])
+            faces[:, :, 0:thickness, :] = torch.zeros(mask_shape)
 
         ids, _ = verification.verify(faces=faces, 
                               embeddings = faces,
@@ -139,7 +140,4 @@ if __name__ == '__main__':
         correct = (ids == labels).type(torch.FloatTensor)
         temp_acc.append(correct.mean())
     accuracy = sum(temp_acc)/len(temp_acc)
-    print("Accuracy: ", accuracy)
-    
-
-        
+    print("Accuracy: ", round(accuracy.item()*100), '%')
