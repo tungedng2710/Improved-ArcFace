@@ -2,15 +2,17 @@
     "train": {
         "loss": "ElasticArcFace", 
         "backbone": "mobilenet",
-        "use_pretrained": false,
-        "pretrained_backbone_path": "./weights/mobilenet.pth",
-        "root_dir": "./data/datav2",
+        "use_pretrained": true,
+        "pretrained_backbone_path": "./weights/insight_mobilenet_backbone.pth",
+        "root_dir": "/home/tungedng2710/python/data/face_data/faces_emore/datav2_mask_type2",
         "num_worker": 8,
         "freeze_model": true,
         "batch_size_train": 64,
         "batch_size_val": 64,
-        "n_epochs": 30,
+        "n_epochs": 10,
+        "learning_rate": 5e-4,
         "use_sam_optim": false,
+        "use_lr_scheduler": false,
         "sam_optim":
         {
             "momentum": 0.9,
@@ -19,23 +21,39 @@
         },
         "scheduler":
         {
-            "name": "StepLR",
-            "step_size": 10,
-            "gamma": 0.5,
-            "verbose": true
+            "name": "OneCycleLR", 
+            "StepLR":
+            {                                                                                                                                                                                
+                "step_size": 10,
+                "gamma": 0.5,
+                "verbose": false
+            },
+            "OneCycleLR":
+            {
+                "max_lr": 1e-3,
+                "epochs": 5
+            }
         },
         "use_lamb_optim": false,
-        "learning_rate": 5e-4,
-        "prefix": "e_arcface",
-        "save_model": false,
+        "prefix": "arcface",
+        "save_model": true,
         "verbose": 1
     },
     "test": {
-        "trainset_path": "./data/grooo112",
-        "testset_path": "./data/asian_masked",
-        "backbone": "irse50",
-        "pretrained_model_path": "./logs/arcface_irse50.pth",
+        "trainset_path": "./data/datav2",
+        "testset_path": "./data/datav2",
+        "backbone": "mobilenet",
+        "pretrained_model_path": "./logs/20211215/arcface_mobilenet.pth",
         "num_worker": 8,
         "batch_size": 32
+    },
+    "verification": {
+        "trainset_path": "./data/datav2",
+        "testset_path": "./data/datav2",
+        "base_embedding": "logs/datav2_base_embedding.pth",
+        "base_labels": "logs/datav2_base_label.pth",
+        "label_dict_path": "./logs/187_label_dict.pkl",
+        "backbone": "mobilenet",
+        "pretrained_backbone_path": "./weights/arcface_mobilenet_187ids_backbone.pth"
     }
 }

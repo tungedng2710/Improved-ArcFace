@@ -12,7 +12,6 @@ from PIL import Image
 
 class FaceDataset(Dataset):
     def __init__(self,
-                 for_training: bool = True,
                  root_dir: str = "/path/to/your/dataset/folder"):
         super(FaceDataset, self).__init__()
         self.transform = transforms.Compose(
@@ -24,8 +23,7 @@ class FaceDataset(Dataset):
             #                       std = [0.229, 0.224, 0.225]),
              ])
         self.root_dir = root_dir
-        if for_training:
-            self.list_data, self.id2name = self.preload()
+        self.list_data, self.id2name = self.preload()
         self.num_classes = len(os.listdir(root_dir))
     
     def convert_id2name(self, id):
