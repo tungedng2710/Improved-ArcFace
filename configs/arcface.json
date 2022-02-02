@@ -1,7 +1,7 @@
 {
     "train": {
         "loss": "ArcFace", 
-        "backbone": "vit-face",
+        "backbone": "convnext",
         "use_pretrained": true,
         "pretrained_backbone_path": "./weights/insight_irse50_backbone.pth",
         "root_dir": "data/datav2",
@@ -9,8 +9,8 @@
         "freeze_model": true,
         "batch_size_train": 64,
         "batch_size_val": 64,
-        "n_epochs": 60,
-        "learning_rate": 1e-4,
+        "n_epochs": 30,
+        "learning_rate": 5e-4,
         "use_sam_optim": false,
         "use_lr_scheduler": true,
         "sam_optim":
@@ -36,7 +36,7 @@
         },
         "use_lamb_optim": false,
         "prefix": "arcface",
-        "save_model": true,
+        "save_model": false,
         "verbose": 1
     },
     "test": {
@@ -48,14 +48,14 @@
         "batch_size": 32
     },
     "verification": {
-        "trainset_path": "./data/asian",
-        "testset_path": "./data/asian",
-        "base_embedding": "logs/asianbase_embedding.pth",
-        "base_labels": "logs/asianbase_label.pth",
-        "label_dict_path": "./logs/asian_974_label_dict.pkl",
-        "backbone": "vit-face",
-        "pretrained_backbone_path": "/home/tungedng2710/python/Improved-ArcFace/weights/20220115/arcface_vit-face_187ids_backbone.pth",
+        "trainset_path": "./data/asian_masked",
+        "testset_path": "./data/asian_masked",
+        "base_embedding": "logs/asian_masked_irse50_base_embedding.pth",
+        "base_labels": "logs/asian_masked_irse50_base_label.pth",
+        "label_dict_path": "./logs/asian_masked_974_label_dict.pkl",
+        "backbone": "irse50",
+        "pretrained_backbone_path": "/home/tungedng2710/python/Improved-ArcFace/weights/20220114/arcface_irse50_187ids_backbone.pth",
         "fill_hair": false,
-        "hair_filling_thickness": 0
+        "hair_filling_thickness": 10
     }
 }

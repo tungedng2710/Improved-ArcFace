@@ -140,4 +140,4 @@ if __name__ == '__main__':
         correct = (ids == labels).type(torch.FloatTensor)
         temp_acc.append(correct.mean())
     accuracy = sum(temp_acc)/len(temp_acc)
-    print("Accuracy: ", round(accuracy.item()*100), '%')
+    print("Accuracy: ", round(accuracy.item()*100, 4), '%')
