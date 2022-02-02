@@ -6,6 +6,7 @@ from backbones.GhostNet import GhostNet
 from backbones.AttentionNets import ResidualAttentionNet
 from backbones.ViT import ViT_face
 from backbones.MLPMixer import MLPMixer
+from backbones.ConvNeXt import convnext_base, convnext_tiny, convnext_small
 
 import os
 import torch
@@ -102,6 +103,9 @@ class ArcFaceModel(nn.Module):
                                      dim = 512,
                                      dropout=0.1,
                                      depth = 8)
+        elif backbone_name == 'convnext':
+            self.backbone = convnext_tiny(num_classes=512)
+
         if use_pretrained:
             try:
                 self.backbone.load_state_dict(torch.load(pretrained_backbone_path))
