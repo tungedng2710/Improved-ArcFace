@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.optim.lr_scheduler import StepLR, OneCycleLR
+from torch.optim.lr_scheduler import StepLR, OneCycleLR, CosineAnnealingLR
 from tqdm import tqdm
 import datetime
 import os
@@ -52,6 +52,9 @@ class Trainer:
                                       max_lr=scheduler_config['OneCycleLR']['max_lr'], 
                                       steps_per_epoch=len(self.train_loader), 
                                       epochs=scheduler_config['OneCycleLR']['epochs'])
+        elif scheduler_config['name'] == 'CosineAnnealingLR':
+            lr_scheduler = CosineAnnealingLR(self.optimizer, 
+                                             T_max=scheduler_config['CosineAnnealingLR']['T_max'])
         else:
             raise Exception("Unavailable scheduler")
         return lr_scheduler

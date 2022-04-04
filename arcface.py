@@ -1,6 +1,6 @@
 from backbones.IRSE import IR_50, IR_SE_50, IR_101, IR_SE_101, IR_152, IR_SE_152
 from backbones.ResNet import ResNet_50, ResNet_101
-from backbones.InvertibleResNet import iresnet18, iresnet34, iresnet50
+from backbones.ImprovedResNet import iresnet18, iresnet34, iresnet50
 from backbones.MobileFaceNets import MobileFaceNet
 from backbones.GhostNet import GhostNet
 from backbones.AttentionNets import ResidualAttentionNet
@@ -44,7 +44,7 @@ class ArcFaceModel(nn.Module):
                 embedding_size: int = 512,
                 type_of_freeze: str= "all"):
         """
-        backbone (str): ir50, irse50, irse101, irse152, mobilenet, resnet50, resnet101, ghostnet, attresnet, vit-face, mlp-mixer
+        backbone (str): ir50, irse50, irse101, irse152, mobilenet, resnet50, resnet101, ghostnet, attresnet, vit-face, mlp-mixer, convnext
         input_size (list): input image size; example: [112, 112]  
         num_classes (int): number of face id
         use_pretrained (bool): use pretrained model
@@ -68,7 +68,7 @@ class ArcFaceModel(nn.Module):
             self.backbone = ResNet_50(input_size)
         elif backbone_name == 'resnet101':
             self.backbone = ResNet_101(input_size)
-        # Invertible ResNet 
+        # ImprovedResNet ResNet 
         elif backbone_name == 'iresnet18': 
             self.backbone = iresnet18()
         elif backbone_name == 'iresnet50':
