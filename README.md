@@ -38,8 +38,14 @@ python align_face.py --root_dir /path/to/dataset/folder --dst_w 112 --dst_h 112
 * ```testset_path```: The path to the directory of test dataset <br/>
 
 ## Training
-In terminal, run ```$ python main.py --config ./path/to/config/file.json --phase train --device 0```
+In terminal, run 
+```bat 
+python main.py --config ./path/to/config/file.json --phase train --device 0
+```
 
 ## Testing
-In terminal, run ```$ python main.py --config ./path/to/config/file.json --phase test --device 0```
+In terminal, run 
+```bat
+python main.py --config ./path/to/config/file.json --phase test --device 0
+```
 
