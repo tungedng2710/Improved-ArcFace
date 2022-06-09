@@ -16,7 +16,11 @@ data
 
 You can find pretrained model at [link](https://drive.google.com/drive/folders/1FMXmo0I9Mhqgjn2cwyD9WcoaV0Ey65dU?usp=sharing) <br />
 
-For face alignment, run ```$python align_face.py --root_dir /path/to/dataset/folder --dst_w 112 --dst_h 112``` (You can change the destination size ```--dst_w``` is output width and ```--dst_h``` is output height) 
+For face alignment, run 
+```bat
+python align_face.py --root_dir /path/to/dataset/folder --dst_w 112 --dst_h 112
+``` 
+(You can change the destination size ```--dst_w``` is output width and ```--dst_h``` is output height) 
 
 ## Configuration 
 ### Train
