@@ -1,6 +1,6 @@
-from backbones.IRSE import IR_50, IR_SE_50, IR_101, IR_SE_101, IR_152, IR_SE_152
+from backbones.IRSE import IR_50, IR_SE_50, IR_SE_101, IR_SE_152
 from backbones.ResNet import ResNet_50, ResNet_101
-from backbones.ImprovedResNet import iresnet18, iresnet34, iresnet50
+from backbones.ImprovedResNet import iresnet18, iresnet50
 from backbones.MobileFaceNets import MobileFaceNet
 from backbones.GhostNet import GhostNet
 from backbones.AttentionNets import ResidualAttentionNet
@@ -8,7 +8,6 @@ from backbones.ViT import ViT_face
 from backbones.MLPMixer import MLPMixer
 from backbones.ConvNeXt import convnext_base, convnext_tiny, convnext_small
 
-import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

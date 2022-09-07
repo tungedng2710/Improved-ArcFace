@@ -1,24 +1,30 @@
 {
     "train": {
         "loss": "ElasticArcFace", 
-        "backbone": "mobilenet",
+        "backbone": "iresnet18",
         "use_pretrained": false,
-        "pretrained_backbone_path": "./weights/insight_irse50_backbone.pth",
-        "root_dir": "data/datav4",
+        "pretrained_backbone_path": "./weights/insight_mobilenet_backbone.pth",
+        "root_dir": "data/datav2",
         "num_worker": 8,
         "freeze_model": true,
         "batch_size_train": 64,
         "batch_size_val": 64,
         "n_epochs": 50,
-        "learning_rate": 5e-4,
-        "use_sam_optim": true,
+        "learning_rate": 1e-3,
         "use_lr_scheduler": false,
-        "use_lamb_optim": true,
+        "optimizer": "adan",
         "sam_optim":
         {
             "momentum": 0.9,
             "rho": 0.05,
             "adaptive": true
+        },
+        "adan_optim":
+        {
+            "beta1": 0.02,
+            "beta2": 0.08,
+            "beta3": 0.01,
+            "weight_decay": 0.02
         },
         "scheduler":
         {
@@ -29,13 +35,12 @@
                 "gamma": 0.7,
                 "verbose": false
             },
-            "OneCycleLR":
+            "CosineAnnealingLR":
             {
-                "max_lr": 1e-3,
-                "epochs": 5
+                "T_max": 10
             }
         },
-        "prefix": "arcface",
+        "prefix": "e_arcface",
         "save_model": false,
         "verbose": 1
     },

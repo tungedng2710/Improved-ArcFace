@@ -3,9 +3,8 @@ from utils.dataset import FaceDataset, FaceDataloader
 from arcface import ArcFaceModel
 from utils.losses import get_loss
 from utils.optimizers import SAM, Lamb
+from adan_pytorch import Adan
 
-import datetime
-import os
 import json
 import torch
 from PIL import ImageFile
@@ -59,21 +58,35 @@ def train(args):
     n_epochs = config['n_epochs']
 
     # Get optimizer
-    if config['use_sam_optim']:
+    optim_name = config["optimizer"].lower()
+    use_sam_optim = False
+    if optim_name == "sam":
         optimizer = SAM(model.parameters(), 
                         lr=config['learning_rate'], 
                         momentum=config['sam_optim']['momentum'],
                         rho=config['sam_optim']['rho'],
                         adaptive=config['sam_optim']['adaptive'])
-    elif config['use_lamb_optim']:
+        use_sam_optim = True
+    elif optim_name == "lamb":
         optimizer = Lamb(model.parameters(), lr=config['learning_rate'], weight_decay=1e-5)
-    else:
-        optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'], weight_decay=1e-5)
+    elif optim_name == "adan":
+        adan_config = config["adan_optim"]
+        betas = (adan_config["beta1"], adan_config["beta2"], adan_config["beta3"])
+        optimizer = Adan(model.parameters(), 
+                         lr=config['learning_rate'], 
+                         betas = betas, 
+                         weight_decay=adan_config["weight_decay"])
+    else: # default optimizer is Adam
+        optimizer = torch.optim.Adam(model.parameters(), 
+                                     lr=config['learning_rate'], 
+                                     weight_decay=1e-5)
+        
     # use learning rate scheduler
     if config['use_lr_scheduler']:
         scheduler_config = config['scheduler']
     else:
         scheduler_config = None
+        
     # Initialize Trainer and train model
     trainer = Trainer(model=model,
                       n_epochs=n_epochs,
@@ -82,7 +95,7 @@ def train(args):
                       device=device,
                       train_loader=train_loader,
                       val_loader=val_loader)
-    trained_model = trainer.train(use_sam_optim=config['use_sam_optim'], 
+    trained_model = trainer.train(use_sam_optim=use_sam_optim, 
                                   verbose=config['verbose'],
                                   scheduler_config=scheduler_config)
     # Save the best model

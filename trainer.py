@@ -1,10 +1,8 @@
 import torch
 import torch.nn as nn
-from torch.optim.lr_scheduler import StepLR, OneCycleLR, CosineAnnealingLR
-from tqdm import tqdm
+from torch.optim.lr_scheduler import StepLR, CosineAnnealingLR
 import datetime
 import os
-from timm.scheduler import create_scheduler
 from torch.utils.tensorboard import SummaryWriter
 from arcface import ArcFaceModel
 
@@ -47,11 +45,6 @@ class Trainer:
                                 step_size=scheduler_config['StepLR']['step_size'], 
                                 gamma=scheduler_config['StepLR']['gamma'],
                                 verbose=scheduler_config['StepLR']['verbose'])
-        elif scheduler_config['name'] == 'OneCycleLR':
-            lr_scheduler = OneCycleLR(self.optimizer, 
-                                      max_lr=scheduler_config['OneCycleLR']['max_lr'], 
-                                      steps_per_epoch=len(self.train_loader), 
-                                      epochs=scheduler_config['OneCycleLR']['epochs'])
         elif scheduler_config['name'] == 'CosineAnnealingLR':
             lr_scheduler = CosineAnnealingLR(self.optimizer, 
                                              T_max=scheduler_config['CosineAnnealingLR']['T_max'])
@@ -66,9 +59,9 @@ class Trainer:
               scheduler_config = None):
         '''
         verbose: 
-            0: nothing will be shown
-            1: shows results per epoch only
-            2: shows train losses per iteration
+            0: show nothing
+            1: show results per epoch only
+            2: show train losses per iteration
         use_sam_optim: True if using SAM Optimizer
         '''
         best_model = self.model
@@ -92,8 +85,8 @@ class Trainer:
                 if verbose > 1:
                     print("iter ", idx, "Train loss: ", loss.item())
                 train_loss += loss.item()
-                if idx % 10 == 9:    # every 10 mini-batches...
-                    # ...log the training loss
+                if idx % 10 == 9:
+                    # log the training loss every 10 mini-batches
                     self.writer.add_scalar('training loss',
                                             train_loss / 10,
                                             epoch * len(self.train_loader) + idx)
@@ -104,8 +97,8 @@ class Trainer:
                 loss, correct = self.eval(X_val, y_val)
                 val_loss += loss.item()
                 acc.append(correct)
-                if idx % 10 == 9:    # every 10 mini-batches...
-                    # ...log the validating loss
+                if idx % 10 == 9:
+                    # log the training loss every 10 mini-batches
                     self.writer.add_scalar('validating loss',
                                             val_loss / 10,
                                             epoch * len(self.val_loader) + idx)
@@ -179,6 +172,9 @@ class Trainer:
         return loss
 
     def sam_update(self, image, y_pred, y_true): 
+        """
+        SAM needs two forward-backward passes to estime the "sharpness-aware" gradient
+        """
         loss = self.loss_function(y_pred, y_true)
         loss.backward()
         self.optimizer.first_step(zero_grad=True)

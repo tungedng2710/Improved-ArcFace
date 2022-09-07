@@ -1,14 +1,11 @@
-import numpy as np
 import os
 import random
 import pickle
+from PIL import Image
 
 import torch
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
-
-import matplotlib.pyplot as plt
-from PIL import Image
 
 class FaceDataset(Dataset):
     def __init__(self,
