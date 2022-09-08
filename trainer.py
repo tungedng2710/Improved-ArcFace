@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.optim.lr_scheduler import StepLR, CosineAnnealingLR
 import datetime
 import os
+from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 from arcface import ArcFaceModel
 
@@ -81,7 +82,7 @@ class Trainer:
                 if use_sam_optim:
                     loss = self.sam_update(images, y_pred, y_train)                   
                 else:
-                    loss = self.normally_update(y_pred, y_train)
+                    loss = self.update(y_pred, y_train)
                 if verbose > 1:
                     print("iter ", idx, "Train loss: ", loss.item())
                 train_loss += loss.item()
@@ -164,7 +165,7 @@ class Trainer:
             torch.save(trained_model.state_dict(), path)
             print('Model is saved at '+path)
 
-    def normally_update(self, y_pred, y_true):
+    def update(self, y_pred, y_true):
         loss = self.loss_function(y_pred, y_true)
         self.optimizer.zero_grad()
         loss.backward()

@@ -2,11 +2,8 @@ from backbones.IRSE import IR_50, IR_SE_50, IR_SE_101, IR_SE_152
 from backbones.ResNet import ResNet_50, ResNet_101
 from backbones.ImprovedResNet import iresnet18, iresnet50
 from backbones.MobileFaceNets import MobileFaceNet
-from backbones.GhostNet import GhostNet
-from backbones.AttentionNets import ResidualAttentionNet
 from backbones.ViT import ViT_face
-from backbones.MLPMixer import MLPMixer
-from backbones.ConvNeXt import convnext_base, convnext_tiny, convnext_small
+from backbones.ConvNeXt import convnext_tiny
 
 import torch
 import torch.nn as nn
@@ -73,19 +70,10 @@ class ArcFaceModel(nn.Module):
         elif backbone_name == 'iresnet50':
             self.backbone = iresnet50()
         # Others
-        elif backbone_name == 'mobilenet':
+        elif backbone_name == 'mobilefacenet':
             self.backbone = MobileFaceNet(embedding_size=embedding_size,
                                           out_h=7,
                                           out_w=7)
-        elif backbone_name == 'ghostnet':
-            self.backbone = GhostNet()
-        elif backbone_name == 'attresnet':
-            self.backbone = ResidualAttentionNet(stage1_modules=1,
-                                                 stage2_modules=1,
-                                                 stage3_modules=1,
-                                                 feat_dim=embedding_size,
-                                                 out_h=7,
-                                                 out_w=7)
         elif backbone_name == 'vit-face':
             self.backbone = ViT_face(image_size=112,
                                      patch_size=8,
@@ -95,15 +83,8 @@ class ArcFaceModel(nn.Module):
                                      mlp_dim=2048,
                                      dropout=0.1,
                                      emb_dropout=0.1)
-        elif backbone_name == 'mlp-mixer':
-            self.backbone = MLPMixer(image_size = 112,
-                                     channels = 3,
-                                     patch_size = 8,
-                                     dim = 512,
-                                     dropout=0.1,
-                                     depth = 8)
         elif backbone_name == 'convnext':
-            self.backbone = convnext_tiny(num_classes=512)
+            self.backbone = convnext_tiny(num_classes=512) # 512 is the length of embedding vector
 
         if use_pretrained:
             try:

@@ -33,6 +33,7 @@ def train(args):
     train_loader, val_loader = dataloader.get_dataloaders(num_worker=config['num_worker'])
     num_classes = dataloader.num_classes
     device = torch.device("cuda:"+args.device if torch.cuda.is_available() else "cpu")
+    print("Loss: ", config["loss"])
     print("Device: ", device)
     print("Number of classes: {num_classes}".format(num_classes=num_classes))
 

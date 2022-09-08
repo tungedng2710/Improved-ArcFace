@@ -1,7 +1,7 @@
 {
     "train": {
         "loss": "ArcFace", 
-        "backbone": "iresnet18",
+        "backbone": "mobilefacenet",
         "use_pretrained": false,
         "pretrained_backbone_path": "./weights/insight_mobilenet_backbone.pth",
         "root_dir": "data/datav2",
@@ -12,7 +12,7 @@
         "n_epochs": 50,
         "learning_rate": 1e-3,
         "use_lr_scheduler": false,
-        "optimizer": "adam",
+        "optimizer": "adan",
         "sam_optim":
         {
             "momentum": 0.9,

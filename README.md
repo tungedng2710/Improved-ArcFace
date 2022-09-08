@@ -25,8 +25,8 @@ python align_face.py --root_dir /path/to/dataset/folder --dst_w 112 --dst_h 112
 ## Configuration 
 ### Train
 * ```loss```: Now you can choose ```ArcFace``` or ```ElasticArcFace```. <br/>
-* ```backbone```: Find supported backbone in ArcFaceModel's docstring. ```irse50``` and ```mobilenet``` have pretrained models on insightface's datasets at [link](https://drive.google.com/drive/folders/1FMXmo0I9Mhqgjn2cwyD9WcoaV0Ey65dU?usp=sharing). Other ones are listed in the doctring of ```ArcFaceModel``` class, but they have to be trained from scratch. <br/>
-* ```freeze_model```: Freeze the backbone of trained model for transfer learning. Set its value is ```fasle``` to train from scratch.
+* ```backbone```: Find supported backbone in ArcFaceModel's docstring. ```irse50``` and ```mobilefacenet``` have pretrained models on insightface's datasets at [link](https://drive.google.com/drive/folders/1FMXmo0I9Mhqgjn2cwyD9WcoaV0Ey65dU?usp=sharing). Other ones are listed in the doctring of ```ArcFaceModel``` class, but they have to be trained from scratch. <br/>
+* ```freeze_model```: Freeze the backbone of trained model for transfer learning. Set its value is ```false``` to train from scratch.
 * ```root_dir```: The path to the directory of train dataset <br/>
 * ```use_lr_scheduler```: Use learning rate scheduler.
 * ```optimizer```: Optimizer for training progress. ```sam```, ```lamb```, ```adam``` and ```adan``` are supported optimizer. You can find the original implementation of [SAM](https://github.com/davda54/sam), [LAMB](https://github.com/cybertronai/pytorch-lamb/blob/master/pytorch_lamb/lamb.py) and [Adan](https://github.com/lucidrains/Adan-pytorch). If you don't change the config, the default optimizer is ADAM. <br/>
