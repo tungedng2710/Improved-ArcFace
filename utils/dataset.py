@@ -2,10 +2,15 @@ import os
 import random
 import pickle
 from PIL import Image
+import numbers
+import numpy as np
 
 import torch
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
+
+import mxnet as mx
+from mxnet import recordio
 
 class FaceDataset(Dataset):
     def __init__(self,
@@ -76,6 +81,45 @@ class FaceDataset(Dataset):
             path = self.root_dir+"/"+class_name+"/"+image_name
             list_of_samples.append(path)
         return class_name, list_of_samples
+
+class MXFaceDataset(Dataset):
+    def __init__(self, root_dir):
+        super(MXFaceDataset, self).__init__()
+        self.transform = transforms.Compose(
+            [transforms.ToPILImage(),
+             transforms.RandomHorizontalFlip(),
+             transforms.ToTensor(),
+             transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+             ])
+        self.root_dir = root_dir
+        path_imgrec = os.path.join(root_dir, 'train.rec')
+        path_imgidx = os.path.join(root_dir, 'train.idx')
+        self.imgrec = mx.recordio.MXIndexedRecordIO(path_imgidx, path_imgrec, 'r')
+        s = self.imgrec.read_idx(0)
+        header, _ = mx.recordio.unpack(s)
+        if header.flag > 0:
+            self.header0 = (int(header.label[0]), int(header.label[1]))
+            self.imgidx = np.array(range(1, int(header.label[0])))
+        else:
+            self.imgidx = np.array(list(self.imgrec.keys))
+        last = mx.recordio.unpack(self.imgrec.read_idx(int(len(self.imgidx)-1)))
+        self.num_labels = int(last[0].label)
+
+    def __getitem__(self, index):
+        idx = self.imgidx[index]
+        s = self.imgrec.read_idx(idx)
+        header, img = mx.recordio.unpack(s)
+        label = header.label
+        if not isinstance(label, numbers.Number):
+            label = label[0]
+        label = torch.tensor(label, dtype=torch.long)
+        sample = mx.image.imdecode(img).asnumpy()
+        if self.transform is not None:
+            sample = self.transform(sample)
+        return sample, label
+
+    def __len__(self):
+        return len(self.imgidx)
 
 class FaceDataloader:
     def __init__(self, 
